@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anita x Fernando🤍</title>
+
+    <!-- Fuentes de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Sacramento&display=swap" rel="stylesheet">
+    
+    <!-- Vinculación CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Anita x Fernando🤍</h1>
+        <p class="subtitle">Una página donde compartir nuestros momentos especiales</p>
+    </header>
+
+    <!-- Menú de pestañas -->
+    <div class="tab-menu">
+        <button class="tab-btn" onclick="openTab(event, 'tab1')">Tiempo juntos ⏳</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab2')">Cosas que me encantan de ti❤️</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab3')">Dedicatorias 🪶📜𓇢𓆸</button>
+    </div>
+
+    <!-- Contenido de las pestañas -->
+    <div class="container">
+        
+        <!-- PESTAÑA 1 -->
+        <div id="tab1" class="tab-content">
+            <div class="card">
+                <h2>Tiempo juntos ⏳</h2>
+                <p>En esta sección podrás revisar un cronómetro que marca el tiempo que llevamos juntos ✎.</p>
+                
+                <img src="Pagina Anita fotos/ABSOLUTE-CINEMA-CONTADOR.jpg" alt="Absolute Cinema" style="width: 100%; max-width: 250px; border-radius: 10px; display: block; margin: 15px auto;" />
+        
+                <!-- Estructura horizontal del cronómetro -->
+                <div class="timer-container">
+                    <div class="timer-box">
+                        <div id="days" class="timer-number">0</div>
+                        <div class="timer-label">Días</div>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-box">
+                        <div id="hours" class="timer-number">00</div>
+                        <div class="timer-label">Horas</div>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-box">
+                        <div id="minutes" class="timer-number">00</div>
+                        <div class="timer-label">Minutos</div>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-box">
+                        <div id="seconds" class="timer-number">00</div>
+                        <div class="timer-label">Segundos</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2 -->
+        <div id="tab2" class="tab-content">
+            <div class="card">
+                <h2>Cosas que me encantan de ti ❤️</h2>
+                <p>En esta sección podrás ver una lista de las cosas que me encantan y nunca deberías olvidar de ti 📜❤️.</p>
+                <p>Fernando a Anita</p>
+                <ul class="love-list">
+                    <li>✨ Tu sentido del humor que me hace reír y olvidarme de los problemas.</li>
+                    <li>✨ Tu forma de ser y lo buena que eres y tratas de ser siempre.</li>
+                    <li>✨ Como se te hacen de lindos los ojitos cuando te da ternura algo.</li>
+                    <li>✨ La forma tan bonita en la que escuchas y te preocupas por mí.</li>
+                    <li>✨ Tu dedicación y la pasión con la que haces las cosas que amas.</li>
+                    <li>✨ Tus ojos tan hermosos, son como un portal de conocer lo más bello del mundo.</li>
+                    <li>✨ Tu voz tan hermosa que me relaja tanto, el instrumento más bello jamás creado. </li>
+                    <li>✨Esa sonrisita tan bella que me ilumina el día.</li>
+                </ul>
+                <p>Tus lindos ojos que me enamoran tanto 🤍</p>
+                <img src="Pagina Anita fotos/Tusbellosojos.jpeg" alt="Absolute Cinema" style="width: 100%; max-width: 250px; border-radius: 10px; display: block; margin: 15px auto;" />
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3 -->
+        <div id="tab3" class="tab-content">
+            <div class="card">
+                <h2>Dedicatorias 🪶📜</h2>
+                <p>En esta sección podrás encontrar algunas dedicatorias que te he escrito 📜🪶.</p>
+                
+                <div class="dedication-box">
+                    <h3>Para mi persona favorita:</h3>
+                    <p class="dedication-text">
+                        "Si pudiera volver a elegir, te elegiría a ti mil veces más. Gracias por cada momento, cada risa y por construir este camino a mi lado. Esta página es solo un pequeño reflejo de todo lo que significas para mí."
+                    </p>
+                    <span class="dedication-signature">— Con todo mi amor, Fernando 🤍</span>
+                    <p class="dedication-text"></p>
+                </div>
+                <div class="dedication-box">
+                    <h3>De Fernando a Anita:</h3>
+                    <p>POEMA #1</p>
+                    <p class="dedication-text">
+                        "𝓛𝒶 𝓃𝑜𝒸𝒽𝑒 𝑒𝓃 𝓆𝓊𝑒 𝓉𝑒 𝒽𝒶𝓁𝓁é,
+𝓂á𝓈 𝓆𝓊𝑒 𝓊𝓃 𝓉𝑒𝓈𝑜𝓇𝑜 𝑒𝓃𝒸𝑜𝓃𝓉𝓇é;
+𝑒𝓃𝓈𝑒𝑔𝓊𝒾𝒹𝒶 𝓂𝑒 𝒾𝓃𝓉𝑒𝓇𝑒𝓈é,
+𝓅𝑒𝓇𝒹𝒾𝒹𝑜 𝑒𝓃 𝓉𝓊 𝒻𝑜𝓇𝓂𝒶 𝒹𝑒 𝓈𝑒𝓇.
+
+𝐸𝓃𝓉𝑒𝓃𝒹𝒾𝑒𝓃𝒹𝑜 𝓆𝓊𝑒 𝑒𝓇𝒶 𝑒𝒻í𝓂𝑒𝓇𝑜,
+𝓂𝑒 𝒶𝓇𝓇𝒾𝑒𝓈𝑔𝓊é 𝑒𝓃 𝑒𝓁 𝒸𝒶𝓂𝒾𝓃𝑜,
+𝒹𝑒𝒸𝒾𝒹𝒾𝒹𝑜 𝒶 𝒹𝑒𝓈𝒸𝒾𝒻𝓇𝒶𝓇𝓉𝑒,
+𝓉𝑜𝒸ó 𝓂𝒾 𝒶𝓁𝓂𝒶 𝑒𝓁 𝒶𝓂𝒶𝓇𝓉𝑒.
+
+𝒥𝓊𝓏𝑔á𝓃𝒹𝑜𝓂𝑒 𝓅𝑜𝓇 𝓉𝒶𝓃 𝓇á𝓅𝒾𝒹𝑜 𝒶𝓂𝒶𝓇;
+𝓅𝑒𝓇𝑜 𝒶 𝓁𝒶 𝓁𝓊𝓃𝒶 𝓃𝑜 𝓁𝒶 𝒸𝓊𝓁𝓅𝑜 𝓅𝑜𝓇 𝒷𝓇𝒾𝓁𝓁𝒶𝓇,
+𝒶𝓁 𝒻𝒾𝓃𝒶𝓁 𝓉𝑜𝒹𝑜 𝓃𝒶𝒸𝑒 𝒹𝑒 𝓁𝑜 𝓃𝒶𝓉𝓊𝓇𝒶𝓁,
+𝒹𝑒 𝓁𝒶 𝒸𝒶𝓁𝓂𝒶 𝓆𝓊𝑒 𝓈𝑜𝓁í𝒶𝓈 𝒷𝓇𝒾𝓃𝒹𝒶𝓇.
+
+𝒩𝑜 𝓈𝒶𝒷í𝒶 𝒸𝑜𝓃 𝓆𝓊é 𝓂á𝓈 𝒾𝒷𝒶𝓈 𝒶 𝒾𝓂𝓅𝓇𝑒𝓈𝒾𝑜𝓃𝒶𝓇𝓂𝑒,
+𝒽𝒶𝓈𝓉𝒶 𝓆𝓊𝑒 𝑒𝓈𝒸𝓊𝒸𝒽é 𝓁𝒶 𝓂𝑒𝓁𝑜𝒹í𝒶 𝓆𝓊𝑒 𝒶𝒸𝒶𝒷𝒶𝒷𝒶𝓈 𝒹𝑒 𝓉𝑜𝒸𝒶𝓇;
+𝓊𝓃 𝓈𝑜𝓃𝒾𝒹𝑜 𝓉𝒶𝓃 𝓅𝓊𝓇𝑜 𝓆𝓊𝑒 𝓃𝒾𝓃𝑔𝓊𝓃𝒶 𝑜𝓇𝓆𝓊𝑒𝓈𝓉𝒶 𝓅𝑜𝒹𝓇í𝒶 𝒾𝓂𝒾𝓉𝒶𝓇,
+𝓉𝓊 𝓋𝑜𝓏 𝓉𝒶𝓃 𝒽𝑒𝓇𝓂𝑜𝓈𝒶 𝓆𝓊𝑒 𝒽𝒶𝒸í𝒶 𝒶 𝓁𝒶𝓈 𝓃𝑜𝒸𝒽𝑒𝓈 𝓃𝑜 𝒹𝓊𝓇𝒶𝓇.
+
+𝒞𝑜𝓃 𝓊𝓃𝒶 𝓂𝒾𝓇𝒶𝒹𝒶 𝓉𝒶𝓃 𝒷𝓇𝒾𝓁𝓁𝒶𝓃𝓉𝑒
+𝓆𝓊𝑒 𝒽𝒶𝓈𝓉𝒶 𝓁𝒶𝓈 𝑒𝓈𝓉𝓇𝑒𝓁𝓁𝒶𝓈 𝓅𝑜𝒹𝓇í𝒶𝓃 𝑒𝓃𝓋𝒾𝒹𝒾𝒶𝓇𝓉𝑒,
+𝓎 𝓊𝓃𝒶 𝒻𝑜𝓇𝓂𝒶 𝓉𝒶𝓃 𝓃𝒶𝓉𝓊𝓇𝒶𝓁 𝒹𝑒 𝑒𝓍𝓅𝓇𝑒𝓈𝒶𝓇𝓉𝑒,
+𝒽𝒶𝒸𝑒𝓈 𝓆𝓊𝑒 𝓉𝑜𝒹𝑜 𝑒𝓃 𝓉𝒾 𝓈𝑒𝒶 𝒶𝓇𝓉𝑒.
+
+𝓛𝒶𝓈 𝓅𝒶𝓁𝒶𝒷𝓇𝒶𝓈 𝓅𝒾𝑒𝓇𝒹𝑒𝓃 𝓈𝑒𝓃𝓉𝒾𝒹𝑜 𝒶𝓁 𝓃𝑜𝓂𝒷𝓇𝒶𝓇𝓉𝑒,
+𝓃𝒾𝓃𝑔𝓊𝓃𝒶 𝓁𝑜𝑔𝓇𝒶 𝓈𝒾𝓆𝓊𝒾𝑒𝓇𝒶 𝒶𝒸𝑒𝓇𝒸𝒶𝓇𝓈𝑒;
+𝓊𝓃𝒶 𝑒𝓍𝓅𝑒𝓇𝒾𝑒𝓃𝒸𝒾𝒶 𝒸𝑜𝓇𝓉𝒶, 𝓅𝑒𝓇𝑜 𝑒𝓉𝑒𝓇𝓃𝒶,
+𝑔𝓊𝒶𝓇𝒹𝒶𝒹𝒶 𝓅𝒶𝓇𝒶 𝓈𝒾𝑒𝓂𝓅𝓇𝑒 𝑒𝓃 𝓂𝒾 𝒶𝓁𝓂𝒶".
+.
+                    </p>
+                    <img src="Pagina Anita fotos/POESIAFERNANDO1.jpeg" alt="Absolute Cinema" style="width: 100%; max-width: 500px; border-radius: 50px; display: block; margin: 15px auto;" />
+                    <div class="dedication-box">
+                    <h3>De Anita a Fernando:</h3>
+                    <p class="dedication-text">
+                        "𝑴𝒊 𝒒𝒖𝒆𝒓𝒊𝒅𝒐 𝑭𝒆𝒓:
+
+𝑬𝒓𝒆𝒔 𝒂𝒍𝒈𝒖𝒊𝒆𝒏 𝒄𝒐𝒏 𝒖𝒏 𝒄𝒐𝒓𝒂𝒛ó𝒏 𝒎𝒖𝒚 𝒍𝒊𝒏𝒅𝒐. 
+𝑺𝒖𝒑𝒐𝒏𝒈𝒐 𝒒𝒖𝒆 𝒚𝒂 𝒍𝒐 𝒉𝒂s 𝒆𝒔𝒄𝒖𝒄𝒉𝒂𝒅𝒐 𝒂𝒏𝒕𝒆𝒔,
+𝒑𝒆𝒓𝒐 𝒏𝒐 𝒎𝒆 𝒊𝒎𝒑𝒐𝒓𝒕𝒂 𝒅𝒆𝒄í𝒓𝒕𝒆𝒍𝒐 𝒔𝒊𝒙 𝒔𝒆𝒗𝒆𝒏
+𝒅𝒆 𝒗𝒆𝒄𝒆𝒔 𝒎á𝒔. 
+
+𝑴𝒆 𝒆𝒏𝒄𝒂𝒏𝒕𝒂 𝒕𝒖 𝒎𝒂𝒏𝒆𝒓𝒂 𝒅𝒆 𝒔𝒆𝒓, 𝒔𝒊𝒎𝒑𝒍𝒆𝒎𝒆𝒏𝒕𝒆
+𝒎𝒆 𝒆𝒏𝒄𝒂𝒏𝒕𝒂 𝒒𝒖𝒆 𝒔𝒆𝒂𝒔 𝒕ú. 𝑻𝒖 𝒑𝒆𝒓𝒔𝒐𝒏𝒂𝒍𝒊𝒅𝒂𝒅 𝒆𝒔
+𝒕𝒂𝒏 ú𝒏𝒊𝒄𝒂. 𝑬𝒓𝒆𝒔 𝒎𝒖𝒚 𝒍𝒊𝒏𝒅𝒐 𝒆 𝒊𝒏𝒄𝒍𝒖𝒔𝒐 𝒎𝒖𝒚
+𝒂𝒅𝒐𝒓𝒂𝒃𝒍𝒆. 𝑴𝒆 𝒆𝒏𝒄𝒂𝒏𝒕𝒂 𝒄𝒖𝒂𝒏𝒅𝒐 𝒕𝒆 𝒊𝒏𝒄𝒐𝒎𝒐𝒅𝒂𝒔
+𝒐 𝒕𝒆 𝒑𝒐𝒏𝒆𝒔 𝒔𝒉𝒚 𝒄𝒖𝒂𝒏𝒅𝒐 𝒕𝒆 𝒎𝒐𝒍𝒆𝒔𝒕𝒐; 𝒕𝒆 𝒎𝒆
+𝒉𝒂𝒄𝒆𝒔 𝒕𝒂𝒏 𝒕𝒊𝒆𝒓𝒏𝒐 𝒚 𝒍𝒊𝒏𝒅𝒐. 
+
+𝑴𝒆 𝒆𝒏𝒄𝒂𝒏𝒕𝒂 𝒕𝒖 𝒔𝒐𝒏𝒓𝒊𝒔𝒂 𝒚 𝒄ó𝒎𝒐 𝒄𝒂𝒅𝒂 𝒅í𝒂
+𝒕𝒆 𝒆𝒔𝒇𝒖𝒆𝒓𝒛𝒂𝒔 𝒑𝒐𝒓 𝒔𝒆𝒓 𝒂𝒍𝒈𝒖𝒊𝒆𝒏 𝒎𝒆𝒋𝒐𝒓. 𝒀 𝒄𝒐𝒏
+𝒆𝒍 𝒔𝒊𝒎𝒑𝒍𝒆 𝒉𝒆𝒄𝒉𝒐 𝒅𝒆 𝒊𝒏𝒕𝒆𝒏𝒕𝒂𝒓𝒍𝒐, 𝒚𝒂 𝒍𝒐 𝒆𝒔𝒕á𝒔
+𝒉𝒂𝒄𝒊𝒆𝒏𝒅𝒐. 𝑷𝒂𝒓𝒂 𝒎í, 𝒚𝒂 𝒆𝒓𝒆𝒔 𝒍𝒐 𝒎𝒆𝒋𝒐𝒓. 
+
+𝒀 𝒉𝒐𝒚, 𝒆𝒏 𝒆𝒔𝒕𝒆 𝒑𝒓𝒆𝒔𝒆𝒏𝒕𝒆, 𝒂𝒈𝒓𝒂𝒅𝒆𝒛𝒄𝒐 𝒕𝒆𝒏𝒆𝒓𝒕𝒆
+𝒆𝒏 𝒎𝒊 𝒗𝒊𝒅𝒂. 𝑮𝒓𝒂𝒄𝒊𝒂𝒔 𝒑𝒐𝒓 𝒔𝒆𝒓 𝒕ú 𝒚 𝒑𝒐𝒓 𝒕𝒐𝒅𝒐𝒔
+𝒆𝒔𝒐𝒔 𝒑𝒆𝒒𝒖𝒆ñ𝒐𝒔 𝒎𝒐𝒎𝒆𝒏𝒕𝒐𝒔 𝒒𝒖𝒆 𝒉𝒂𝒄𝒆𝒏 𝒒𝒖𝒆 𝒕𝒆
+𝒒𝒖𝒊𝒆𝒓𝒂 𝒄𝒂𝒅𝒂 𝒅í𝒂 𝒖𝒏 𝒑𝒐𝒒𝒖𝒊𝒕𝒐 𝒎á𝒔. 
+
+𝑻𝒆 𝒒𝒖𝒊𝒆𝒓𝒐 𝒎𝒖𝒄𝒉𝒐, 𝒎𝒊 𝑭𝒆𝒓. ♡".
+.
+                    </p>
+                    <img src="Pagina Anita fotos/CARTA ANITA A FERNANDO.jpeg" alt="Absolute Cinema" style="width: 100%; max-width: 500px; border-radius: 50px; display: block; margin: 15px auto;" />
+            </div>
+            </div>
+            
+        </div>
+
+    </div>
+
+                  
+                </div>
+    <!-- Vinculación con el archivo JS -->
+    <script src="script.js"></script>
+</body>
+</html>

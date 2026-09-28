@@ -1,0 +1,169 @@
+:root {
+    --primary-color: #ff4b72;
+    --secondary-color: #ff85a1;
+    --bg-color: #ffadd9; /* Rosado suave para el fondo */
+    --card-bg: #f8f8f8;  /* Blanco para resaltar las tarjetas */
+    --text-color: #2b2d42;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-family: 'Sacramento', cursive;
+    font-size: 3.5rem;
+    color: var(--primary-color);
+    margin: 10px 0 0 0;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+/* --- MENÚ DE PESTAÑAS --- */
+.tab-menu {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    background-color: #e7aeff;
+    border: 2px solid var(--secondary-color);
+    color: var(--primary-color);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background-color: var(--secondary-color);
+    color: rgb(247, 147, 242);
+}
+
+.tab-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: rgb(246, 161, 255);
+    box-shadow: 0 4px 10px rgba(255, 75, 114, 0.3);
+}
+
+/* --- CONTENEDORES Y PESTAÑAS --- */
+.container {
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Oculta las pestañas por defecto */
+.tab-content {
+    display: none;
+}
+
+/* Muestra únicamente la pestaña activa */
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+/* --- ESTILOS DEL CRONÓMETRO --- */
+.timer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.timer-box {
+    background-color: var(--bg-color);
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.timer-number {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.timer-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+/* --- ESTILOS DE LA LISTA --- */
+.love-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.love-list li {
+    padding: 12px 15px;
+    background-color: #fff5f7;
+    border-left: 4px solid var(--secondary-color);
+    margin-bottom: 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95rem;
+}
+
+/* --- ESTILOS DE DEDICATORIAS --- */
+.dedication-box {
+    background-color: #fff5f7;
+    border: 1px dashed var(--secondary-color);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.dedication-text {
+    font-style: italic;
+    line-height: 1.6;
+    color: #4a4a4a;
+}
+
+.dedication-signature {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-align: right;
+}
