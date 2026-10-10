@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Sacramento&display=swap" rel="stylesheet">
     
     <!-- Vinculación CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -19,17 +19,19 @@
     </header>
 
     <!-- Menú de pestañas -->
-    <div class="tab-menu">
-        <button class="tab-btn" onclick="openTab(event, 'tab1')">Tiempo juntos ⏳</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab2')">Cosas que me encantan de ti❤️</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab3')">Dedicatorias 🪶📜𓇢𓆸</button>
+    <div class="tab-menu" role="tablist" aria-label="Secciones de Anita y Fernando">
+        <button class="tab-btn active" onclick="openTab(event, 'tab1')" role="tab" aria-controls="tab1" aria-selected="true">Tiempo juntos ⏳</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab2')" role="tab" aria-controls="tab2" aria-selected="false">Cosas que me encantan de ti ❤️</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab3')" role="tab" aria-controls="tab3" aria-selected="false">Dedicatorias 🪶📜𓇢𓆸</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab4')" role="tab" aria-controls="tab4" aria-selected="false">Cuenta regresiva 💞</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab5')" role="tab" aria-controls="tab5" aria-selected="false">Nuestra música juntos 🎶</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab6')" role="tab" aria-controls="tab6" aria-selected="false">Diario de nosotros 📔</button>
     </div>
-
     <!-- Contenido de las pestañas -->
     <div class="container">
         
         <!-- PESTAÑA 1 -->
-        <div id="tab1" class="tab-content">
+        <div id="tab1" class="tab-content active">
             <div class="card">
                 <h2>Tiempo juntos ⏳</h2>
                 <p>En esta sección podrás revisar un cronómetro que marca el tiempo que llevamos juntos ✎.</p>
@@ -171,9 +173,87 @@
 
     </div>
 
-                  
+        <div id="tab4" class="tab-content">
+            <div class="card reunion-card">
+                <span class="section-kicker">Cada día un poquito más cerca</span>
+                <h2>La cuenta regresiva para vernos 💞</h2>
+                <p>Elige el día de diciembre en que se volverán a encontrar. Contamos hasta esa fecha usando la hora actual como referencia.</p>
+                <label class="field-label" for="reunion-date">Nuestro día especial</label>
+                <input id="reunion-date" class="date-input" type="date" value="2026-12-01" aria-describedby="reunion-note">
+                <p id="reunion-note" class="helper-text">La fecha inicial es el 1 de diciembre; puedes cambiarla por el día exacto.</p>
+                <div class="timer-container reunion-timer" aria-live="polite">
+                    <div class="timer-box">
+                        <div id="reunion-days" class="timer-number">0</div>
+                        <div class="timer-label">Días</div>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-box">
+                        <div id="reunion-hours" class="timer-number">00</div>
+                        <div class="timer-label">Horas</div>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-box">
+                        <div id="reunion-minutes" class="timer-number">00</div>
+                        <div class="timer-label">Minutos</div>
+                    </div>
+                    <div class="timer-separator">:</div>
+                    <div class="timer-box">
+                        <div id="reunion-seconds" class="timer-number">00</div>
+                        <div class="timer-label">Segundos</div>
+                    </div>
                 </div>
+                <p id="reunion-message" class="reunion-message">Ya falta un poquito menos 🤍</p>
+            </div>
+        </div>
+
+        <div id="tab5" class="tab-content">
+            <div class="card">
+                <span class="section-kicker">La banda sonora de lo nuestro</span>
+                <h2>Nuestra música juntos 🎶</h2>
+                <p>Guarden una canción, escriban lo que significa para ustedes y añadan una foto para acompañarla.</p>
+                <form id="music-form" class="entry-form">
+                    <label class="field-label" for="song-title">Nombre de la canción</label>
+                    <input id="song-title" name="title" type="text" maxlength="100" placeholder="Una canción especial..." required>
+                    <label class="field-label" for="song-note">Lo que queremos recordar</label>
+                    <textarea id="song-note" name="note" rows="4" maxlength="2000" placeholder="Escribe la canción o por qué es especial para ustedes..." required></textarea>
+                    <label class="field-label" for="song-url">Enlace para escuchar <span class="optional-label">(opcional)</span></label>
+                    <input id="song-url" name="url" type="url" placeholder="https://...">
+                    <label class="field-label" for="song-photo">Una foto para este recuerdo</label>
+                    <input id="song-photo" class="file-input" name="photo" type="file" accept="image/*" required>
+                    <div id="song-photo-preview" class="upload-preview" hidden></div>
+                    <button class="action-btn" type="submit">Guardar canción y recuerdo ♡</button>
+                    <p id="music-status" class="form-status" role="status" aria-live="polite"></p>
+                </form>
+                <p class="helper-text privacy-note">Las canciones y fotos quedan guardadas en este navegador y en este dispositivo.</p>
+                <div id="music-empty" class="empty-state">Su primera canción puede empezar aquí ✨</div>
+                <div id="music-list" class="music-list" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <div id="tab6" class="tab-content">
+            <div class="card">
+                <span class="section-kicker">Un lugar para guardar lo que sienten</span>
+                <h2>Diario de nosotros 📔</h2>
+                <p>Escribe lo que piensas, algo que sucedió o un recuerdo que quieras guardar.</p>
+                <form id="diary-form" class="entry-form">
+                    <label class="field-label" for="diary-title">Título <span class="optional-label">(opcional)</span></label>
+                    <input id="diary-title" name="title" type="text" maxlength="100" placeholder="Un día bonito...">
+                    <label class="field-label" for="diary-entry">Tu registro</label>
+                    <textarea id="diary-entry" name="entry" rows="5" maxlength="3000" placeholder="Escribe lo que piensas o lo que sucedió..." required></textarea>
+                    <button class="action-btn" type="submit">Guardar en nuestro diario ♡</button>
+                    <p id="diary-status" class="form-status" role="status" aria-live="polite"></p>
+                </form>
+                <p class="helper-text privacy-note">Los registros quedan guardados en este navegador y en este dispositivo.</p>
+                <div id="diary-empty" class="empty-state">Todavía no hay recuerdos guardados. Este espacio es suyo 🤍</div>
+                <div id="diary-list" class="diary-list" aria-live="polite"></div>
+            </div>
+        </div>
+
+    </div>
+
+                  
     <!-- Vinculación con el archivo JS -->
-    <script src="script.js"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
+
