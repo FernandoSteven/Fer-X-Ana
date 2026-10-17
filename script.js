@@ -207,6 +207,66 @@ function safeHttpUrl(value) {
     }
 }
 
+function songPlayerInfo(value) {
+    const safeUrl = safeHttpUrl(value);
+    if (!safeUrl) return null;
+
+    let url;
+    try {
+        url = new URL(safeUrl);
+    } catch {
+        return null;
+    }
+
+    const host = url.hostname.toLowerCase().replace(/^www\./, '');
+    const youtubeHosts = new Set(['youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'youtube-nocookie.com']);
+    if (youtubeHosts.has(host)) {
+        const pathParts = url.pathname.split('/').filter(Boolean);
+        let videoId = '';
+        if (host === 'youtu.be') {
+            videoId = pathParts[0] || '';
+        } else {
+            videoId = url.searchParams.get('v') || '';
+            if (!videoId) {
+                const videoPathIndex = pathParts.findIndex(part => ['embed', 'shorts', 'live', 'v'].includes(part));
+                if (videoPathIndex !== -1) videoId = pathParts[videoPathIndex + 1] || '';
+            }
+        }
+
+        if (/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+            const embedUrl = new URL('https://www.youtube-nocookie.com/embed/' + videoId);
+            embedUrl.searchParams.set('controls', '1');
+            embedUrl.searchParams.set('playsinline', '1');
+            embedUrl.searchParams.set('rel', '0');
+            embedUrl.searchParams.set('hl', 'es');
+            return { type: 'youtube', src: embedUrl.href, linkLabel: 'Abrir en YouTube ♫' };
+        }
+    }
+
+    if (host === 'open.spotify.com') {
+        const pathParts = url.pathname.split('/').filter(Boolean).filter(part => !/^intl-[a-z]{2}$/i.test(part));
+        const type = pathParts[0] || '';
+        const itemId = pathParts[1] || '';
+        if (['track', 'album', 'playlist', 'artist', 'show', 'episode'].includes(type)
+            && /^[A-Za-z0-9]+$/.test(itemId)) {
+            const embedUrl = new URL('/embed/' + type + '/' + itemId, 'https://open.spotify.com');
+            embedUrl.searchParams.set('utm_source', 'generator');
+            return {
+                type: 'spotify',
+                src: embedUrl.href,
+                height: type === 'track' || type === 'episode' ? 152 : 352,
+                linkLabel: 'Abrir en Spotify ♫'
+            };
+        }
+    }
+
+    if (/\.(?:aac|flac|m4a|mp3|oga|ogg|opus|wav)$/i.test(url.pathname)) {
+        return { type: 'audio', src: safeUrl, linkLabel: 'Abrir audio ♫' };
+    }
+
+    return { type: 'link', src: safeUrl, linkLabel: 'Abrir canción ♫' };
+}
+
 function publicPhotoUrl(path) {
     // Solo se muestran fotos subidas con el formato que usa esta página.
     if (!/^(?:songs|dedications)\/[0-9a-f-]{36}\.jpg$/i.test(String(path || ''))) return '';
@@ -544,6 +604,11 @@ function renderMusic() {
     songs.forEach(song => {
         const card = document.createElement('article');
         card.className = 'music-entry';
+        const layout = document.createElement('div');
+        layout.className = 'music-entry-main';
+
+        const cover = document.createElement('div');
+        cover.className = 'music-entry-cover';
         const imageUrl = publicPhotoUrl(song.image_path);
         if (imageUrl) {
             const image = document.createElement('img');
@@ -551,31 +616,84 @@ function renderMusic() {
             image.src = imageUrl;
             image.alt = 'Foto para el recuerdo musical: ' + (song.title || 'canción');
             image.loading = 'lazy';
-            card.append(image);
+            cover.append(image);
+        } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'music-photo-placeholder';
+            placeholder.setAttribute('aria-hidden', 'true');
+            placeholder.textContent = '♫';
+            cover.append(placeholder);
         }
+        layout.append(cover);
+
+        const details = document.createElement('div');
+        details.className = 'music-entry-content';
 
         const title = document.createElement('h3');
         title.textContent = song.title || 'Nuestra canción';
-        card.append(title);
+        details.append(title);
 
         if (song.content) {
             const note = document.createElement('p');
             note.textContent = song.content;
-            card.append(note);
+            details.append(note);
         }
 
         const songUrl = safeHttpUrl(song.song_url);
+        const playerInfo = songPlayerInfo(songUrl);
+        const player = document.createElement('div');
+        player.className = 'music-player';
+        if (playerInfo && playerInfo.type !== 'link') {
+            player.classList.add('music-player-' + playerInfo.type);
+            const playerLabel = document.createElement('span');
+            playerLabel.className = 'music-player-label';
+            playerLabel.textContent = 'Escucha aquí ♫';
+            player.append(playerLabel);
+
+            if (playerInfo.type === 'audio') {
+                const audio = document.createElement('audio');
+                audio.className = 'music-player-audio';
+                audio.controls = true;
+                audio.preload = 'none';
+                audio.src = playerInfo.src;
+                audio.setAttribute('aria-label', 'Reproducir ' + (song.title || 'la canción'));
+                player.append(audio);
+            } else {
+                const iframe = document.createElement('iframe');
+                iframe.className = 'music-player-embed';
+                iframe.src = playerInfo.src;
+                iframe.title = 'Reproductor de ' + (song.title || 'la canción');
+                iframe.loading = 'lazy';
+                iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                iframe.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+                iframe.allowFullscreen = true;
+                if (playerInfo.height) iframe.height = String(playerInfo.height);
+                player.append(iframe);
+            }
+            details.append(player);
+        } else {
+            const notice = document.createElement('p');
+            notice.className = 'music-player-notice';
+            notice.textContent = songUrl
+                ? 'Este enlace abre la canción en su servicio. También puedes reproducir enlaces de YouTube, Spotify o archivos de audio.'
+                : 'Añade un enlace de YouTube, Spotify o un archivo de audio para escucharla aquí.';
+            details.append(notice);
+        }
+
         if (songUrl) {
             const link = document.createElement('a');
             link.className = 'song-link';
             link.href = songUrl;
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
-            link.textContent = 'Escuchar esta canción ♫';
-            card.append(link);
+            link.textContent = playerInfo ? playerInfo.linkLabel : 'Escuchar esta canción ♫';
+            details.append(link);
         }
-        card.append(makeDateElement(song.created_at));
-        renderMemoryActions(song, card);
+
+        details.append(makeDateElement(song.created_at));
+        renderMemoryActions(song, details);
+        layout.append(details);
+        card.append(layout);
         musicList.append(card);
     });
 }

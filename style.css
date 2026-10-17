@@ -639,13 +639,42 @@ body > .container {
     padding: 16px;
 }
 
+.music-entry-main {
+    display: grid;
+    grid-template-columns: minmax(210px, .8fr) minmax(0, 1.2fr);
+    align-items: start;
+    gap: 20px;
+}
+
+.music-entry-cover,
+.music-entry-content {
+    min-width: 0;
+}
+
 .music-photo {
     display: block;
     width: 100%;
     max-height: 360px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 13px;
-    margin-bottom: 14px;
+    background: #fff;
+    box-shadow: 0 7px 18px rgba(91, 52, 75, .1);
+}
+
+.music-photo-placeholder {
+    display: grid;
+    min-height: 220px;
+    aspect-ratio: 4 / 5;
+    place-items: center;
+    border: 1px solid #f0dbe5;
+    border-radius: 13px;
+    background: radial-gradient(circle at 50% 40%, #fff 0, #fff0f5 42%, #f1d4e0 100%);
+    color: #c94f78;
+    font-size: 4rem;
+}
+
+.music-entry-content {
+    overflow-wrap: anywhere;
 }
 
 .music-entry h3 {
@@ -664,6 +693,54 @@ body > .container {
 .music-entry .song-link {
     display: inline-block;
     margin: 3px 12px 8px 0;
+}
+
+.music-player {
+    margin: 16px 0 10px;
+    padding: 12px;
+    border: 1px solid #efd8e4;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fffafd, #fff0f5);
+    box-shadow: 0 6px 16px rgba(105, 63, 91, .06);
+}
+
+.music-player-label {
+    display: block;
+    margin: 0 0 9px;
+    color: #a84267;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.music-player-embed {
+    display: block;
+    width: 100%;
+    height: 152px;
+    border: 0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.music-player-youtube .music-player-embed {
+    height: auto;
+    min-height: 200px;
+    aspect-ratio: 16 / 9;
+}
+
+.music-player-audio {
+    display: block;
+    width: 100%;
+    accent-color: #c94f78;
+}
+
+.music-player-notice {
+    margin: 14px 0 8px !important;
+    padding: 10px 12px;
+    border: 1px solid #f0dbe5;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .72);
+    color: #806b79;
+    font-size: .86rem;
 }
 
 .entry-date {
@@ -789,6 +866,25 @@ body > .container {
 }
 
 @media (max-width: 600px) {
+    .music-entry-main {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 15px;
+    }
+
+    .music-entry-cover {
+        width: min(100%, 360px);
+        margin: 0 auto;
+    }
+
+    .music-photo-placeholder {
+        min-height: 190px;
+        max-height: 300px;
+    }
+
+    .music-player-youtube .music-player-embed {
+        min-height: 200px;
+    }
+
     .shared-dedications {
         padding: 16px;
     }
