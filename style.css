@@ -676,3 +676,124 @@ body > .container {
 .diary-entry {
     box-shadow: 0 8px 20px rgba(105, 63, 91, .06);
 }
+
+/* --- DEDICATORIAS Y EDICIÓN DE RECUERDOS COMPARTIDOS --- */
+.featured-poem {
+    margin-top: 18px;
+    background: linear-gradient(145deg, #fff5ee, #fffafd 70%, #f8eff8);
+    border: 1px solid #efd5d5;
+    box-shadow: 0 10px 28px rgba(145, 78, 91, .09);
+}
+
+.shared-dedications {
+    margin-top: 28px;
+    padding: 22px;
+    border: 1px solid #efd8e4;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #fff9fc, #fff5f7);
+}
+
+.shared-dedications > h3 {
+    margin: 0 0 8px;
+    color: #a84267;
+    font-size: 1.35rem;
+}
+
+.dedication-list {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.dedication-entry {
+    padding: 18px;
+    border: 1px solid #f0dbe5;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fff8fb, #fbf7fc);
+    box-shadow: 0 8px 20px rgba(105, 63, 91, .06);
+}
+
+.dedication-photo {
+    display: block;
+    width: min(100%, 500px);
+    max-height: 620px;
+    object-fit: contain;
+    margin: 0 auto 14px;
+    border: 5px solid #fff;
+    border-radius: 18px;
+    box-shadow: 0 7px 20px rgba(91, 52, 75, .13);
+}
+
+.dedication-entry h3 {
+    margin: 4px 0 8px;
+    color: #a84267;
+    font-size: 1.15rem;
+}
+
+.dedication-entry-text {
+    margin: 8px 0 12px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.memory-actions,
+.memory-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.memory-action-btn {
+    border: 1px solid #e7bfd0;
+    border-radius: 999px;
+    background: #fff;
+    color: #8d4c68;
+    padding: 8px 14px;
+    font: inherit;
+    font-size: .86rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.memory-action-btn:hover {
+    background: #fff0f5;
+    transform: translateY(-1px);
+}
+
+.memory-action-btn.danger {
+    color: #9a4556;
+    border-color: #ebc1c7;
+}
+
+.memory-action-btn.danger:hover {
+    background: #fff0f0;
+}
+
+.memory-edit-form {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+}
+
+.memory-edit-form .field-label {
+    margin-top: 3px;
+}
+
+.memory-edit-actions .action-btn {
+    width: auto;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .shared-dedications {
+        padding: 16px;
+    }
+
+    .dedication-entry {
+        padding: 14px;
+    }
+}

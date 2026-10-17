@@ -209,7 +209,7 @@ function safeHttpUrl(value) {
 
 function publicPhotoUrl(path) {
     // Solo se muestran fotos subidas con el formato que usa esta página.
-    if (!/^songs\/[0-9a-f-]{36}\.jpg$/i.test(String(path || ''))) return '';
+    if (!/^(?:songs|dedications)\/[0-9a-f-]{36}\.jpg$/i.test(String(path || ''))) return '';
     return supabaseUrl + '/storage/v1/object/public/' + storageBucket + '/' + path
         .split('/').map(encodeURIComponent).join('/');
 }
@@ -293,9 +293,10 @@ function compressPhoto(file) {
     });
 }
 
-async function uploadSongPhoto(file) {
+async function uploadSharedPhoto(file, folder) {
     const blob = await compressPhoto(file);
-    const path = 'songs/' + crypto.randomUUID() + '.jpg';
+    const safeFolder = folder === 'dedications' ? 'dedications' : 'songs';
+    const path = safeFolder + '/' + crypto.randomUUID() + '.jpg';
     await supabaseRequest('/storage/v1/object/' + storageBucket + '/' + path
         .split('/').map(encodeURIComponent).join('/'), {
         method: 'POST',
@@ -308,6 +309,15 @@ async function uploadSongPhoto(file) {
     return path;
 }
 
+async function deleteSharedPhoto(path) {
+    if (!/^(?:songs|dedications)\/[0-9a-f-]{36}\.jpg$/i.test(String(path || ''))) return;
+    await supabaseRequest('/storage/v1/object/' + storageBucket, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prefixes: [path] })
+    });
+}
+
 async function loadSharedMemories() {
     const rows = await supabaseRequest(
         '/rest/v1/memories?select=id,kind,title,content,song_url,image_path,created_at&order=created_at.desc&limit=200'
@@ -315,6 +325,188 @@ async function loadSharedMemories() {
     sharedMemories = Array.isArray(rows) ? rows : [];
     renderMusic();
     renderDiary();
+    renderDedications();
+}
+
+let editingMemoryId = null;
+
+function statusForMemory(memory) {
+    if (memory.kind === 'music') return musicStatus;
+    if (memory.kind === 'dedication') return dedicationStatus;
+    return diaryStatus;
+}
+
+function createMemoryButton(label, className, onClick) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = className;
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
+}
+
+function renderMemoryActions(memory, card) {
+    if (editingMemoryId === memory.id) {
+        renderMemoryEditor(memory, card);
+        return;
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'memory-actions';
+    actions.append(
+        createMemoryButton('Editar ✎', 'memory-action-btn', () => {
+            editingMemoryId = memory.id;
+            renderMusic();
+            renderDiary();
+            renderDedications();
+        }),
+        createMemoryButton('Borrar ×', 'memory-action-btn danger', async () => {
+            if (!window.confirm('¿Quieres borrar este recuerdo de la página para todos?')) return;
+            const status = statusForMemory(memory);
+            setStatus(status, 'Borrando recuerdo...');
+            try {
+                await supabaseRequest('/rest/v1/memories?id=eq.' + encodeURIComponent(memory.id), {
+                    method: 'DELETE',
+                    headers: { 'Prefer': 'return=minimal' }
+                });
+                sharedMemories = sharedMemories.filter(item => item.id !== memory.id);
+                renderMusic();
+                renderDiary();
+                renderDedications();
+                if (memory.image_path) {
+                    try { await deleteSharedPhoto(memory.image_path); } catch { /* La publicación ya fue borrada. */ }
+                }
+                setStatus(status, 'El recuerdo se borró de la página para todos.');
+            } catch (error) {
+                setStatus(status, error.message || 'No se pudo borrar el recuerdo.');
+            }
+        })
+    );
+    card.append(actions);
+}
+
+function renderMemoryEditor(memory, card) {
+    const form = document.createElement('form');
+    form.className = 'memory-edit-form';
+
+    const titleLabel = document.createElement('label');
+    titleLabel.className = 'field-label';
+    titleLabel.textContent = memory.kind === 'music' ? 'Nombre de la canción' : 'Título';
+    const title = document.createElement('input');
+    title.type = 'text';
+    title.maxLength = 100;
+    title.value = memory.title || '';
+    title.required = memory.kind !== 'diary';
+    titleLabel.append(title);
+
+    const contentLabel = document.createElement('label');
+    contentLabel.className = 'field-label';
+    contentLabel.textContent = memory.kind === 'music' ? 'Lo que queremos recordar' : 'Texto';
+    const content = document.createElement('textarea');
+    content.rows = 5;
+    content.maxLength = memory.kind === 'music' ? 2000 : 3000;
+    content.value = memory.content || '';
+    content.required = true;
+    contentLabel.append(content);
+    form.append(titleLabel, contentLabel);
+
+    let songUrl;
+    if (memory.kind === 'music') {
+        const urlLabel = document.createElement('label');
+        urlLabel.className = 'field-label';
+        urlLabel.textContent = 'Enlace de la canción (opcional)';
+        songUrl = document.createElement('input');
+        songUrl.type = 'url';
+        songUrl.value = memory.song_url || '';
+        urlLabel.append(songUrl);
+        form.append(urlLabel);
+    }
+
+    let photoInput;
+    if (memory.kind === 'music' || memory.kind === 'dedication') {
+        const photoLabel = document.createElement('label');
+        photoLabel.className = 'field-label';
+        photoLabel.textContent = memory.image_path ? 'Cambiar foto (opcional)' : 'Añadir foto (opcional)';
+        photoInput = document.createElement('input');
+        photoInput.type = 'file';
+        photoInput.accept = 'image/*';
+        photoInput.className = 'file-input';
+        photoLabel.append(photoInput);
+        form.append(photoLabel);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'memory-edit-actions';
+    const save = document.createElement('button');
+    save.type = 'submit';
+    save.className = 'action-btn';
+    save.textContent = 'Guardar cambios ♡';
+    const cancel = createMemoryButton('Cancelar', 'memory-action-btn', () => {
+        editingMemoryId = null;
+        renderMusic();
+        renderDiary();
+        renderDedications();
+    });
+    actions.append(save, cancel);
+    const status = document.createElement('p');
+    status.className = 'form-status';
+    status.setAttribute('role', 'status');
+    form.append(actions, status);
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const newTitle = title.value.trim();
+        const newContent = content.value.trim();
+        const rawUrl = songUrl ? songUrl.value.trim() : '';
+        const safeUrl = safeHttpUrl(rawUrl);
+        const file = photoInput && photoInput.files && photoInput.files[0];
+
+        if (!supabaseReady) {
+            setStatus(status, 'No se pudo conectar con los recuerdos compartidos.');
+            return;
+        }
+        if (!newContent || (memory.kind !== 'diary' && !newTitle)) {
+            setStatus(status, 'Completa el título y el texto antes de guardar.');
+            return;
+        }
+        if (rawUrl && !safeUrl) {
+            setStatus(status, 'Revisa el enlace de la canción.');
+            return;
+        }
+
+        save.disabled = true;
+        setStatus(status, 'Guardando cambios...');
+        let uploadedPath = '';
+        try {
+            if (file) uploadedPath = await uploadSharedPhoto(file, memory.kind === 'dedication' ? 'dedications' : 'songs');
+            const changes = { title: newTitle, content: newContent };
+            if (memory.kind === 'music') changes.song_url = safeUrl || null;
+            if (uploadedPath) changes.image_path = uploadedPath;
+            await supabaseRequest('/rest/v1/memories?id=eq.' + encodeURIComponent(memory.id), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify(changes)
+            });
+
+            const oldImagePath = memory.image_path;
+            Object.assign(memory, changes);
+            editingMemoryId = null;
+            renderMusic();
+            renderDiary();
+            renderDedications();
+            if (uploadedPath && oldImagePath) {
+                try { await deleteSharedPhoto(oldImagePath); } catch { /* El recuerdo conserva su foto nueva. */ }
+            }
+            setStatus(statusForMemory(memory), 'Cambios guardados para todos 🤍');
+        } catch (error) {
+            if (uploadedPath) {
+                try { await deleteSharedPhoto(uploadedPath); } catch { /* Se conserva el error original. */ }
+            }
+            setStatus(status, error.message || 'No se pudieron guardar los cambios.');
+        } finally {
+            save.disabled = false;
+        }
+    });
+    card.replaceChildren(form);
 }
 
 // --- VISTA DE NUESTRA MÚSICA ---
@@ -383,6 +575,7 @@ function renderMusic() {
             card.append(link);
         }
         card.append(makeDateElement(song.created_at));
+        renderMemoryActions(song, card);
         musicList.append(card);
     });
 }
@@ -413,7 +606,7 @@ if (musicForm) {
         if (submitButton) submitButton.disabled = true;
         setStatus(musicStatus, 'Preparando y guardando su recuerdo...');
         try {
-            const imagePath = await uploadSongPhoto(file);
+            const imagePath = await uploadSharedPhoto(file, 'songs');
             await supabaseRequest('/rest/v1/memories', {
                 method: 'POST',
                 headers: {
@@ -475,6 +668,7 @@ function renderDiary() {
         const body = document.createElement('p');
         body.textContent = entry.content || '';
         card.append(heading, body);
+        renderMemoryActions(entry, card);
         diaryList.append(card);
     });
 }
@@ -527,23 +721,132 @@ if (diaryForm) {
     });
 }
 
+// --- VISTA Y PUBLICACIÓN DE DEDICATORIAS ---
+const dedicationForm = document.getElementById('dedication-form');
+const dedicationList = document.getElementById('dedication-list');
+const dedicationEmpty = document.getElementById('dedication-empty');
+const dedicationStatus = document.getElementById('dedication-status');
+const dedicationPhotoInput = document.getElementById('dedication-photo');
+const dedicationPhotoPreview = document.getElementById('dedication-photo-preview');
+let dedicationPreviewUrl = '';
+
+if (dedicationPhotoInput && dedicationPhotoPreview) {
+    dedicationPhotoInput.addEventListener('change', () => {
+        if (dedicationPreviewUrl) URL.revokeObjectURL(dedicationPreviewUrl);
+        const file = dedicationPhotoInput.files && dedicationPhotoInput.files[0];
+        dedicationPhotoPreview.replaceChildren();
+        dedicationPhotoPreview.hidden = !file;
+        if (!file) return;
+        dedicationPreviewUrl = URL.createObjectURL(file);
+        const image = document.createElement('img');
+        image.className = 'preview-image';
+        image.alt = 'Vista previa de la foto de la dedicatoria';
+        image.src = dedicationPreviewUrl;
+        dedicationPhotoPreview.append(image);
+    });
+}
+
+function renderDedications() {
+    if (!dedicationList || !dedicationEmpty) return;
+    const dedications = sharedMemories.filter(memory => memory.kind === 'dedication');
+    dedicationList.replaceChildren();
+    dedicationEmpty.hidden = dedications.length > 0;
+
+    dedications.forEach(dedication => {
+        const card = document.createElement('article');
+        card.className = 'dedication-entry';
+        const imageUrl = publicPhotoUrl(dedication.image_path);
+        if (imageUrl) {
+            const image = document.createElement('img');
+            image.className = 'dedication-photo';
+            image.src = imageUrl;
+            image.alt = 'Foto para la dedicatoria: ' + (dedication.title || 'poema');
+            image.loading = 'lazy';
+            card.append(image);
+        }
+        const title = document.createElement('h3');
+        title.textContent = dedication.title || 'Una dedicatoria nuestra';
+        const body = document.createElement('p');
+        body.className = 'dedication-entry-text';
+        body.textContent = dedication.content || '';
+        card.append(title, body, makeDateElement(dedication.created_at));
+        renderMemoryActions(dedication, card);
+        dedicationList.append(card);
+    });
+}
+
+if (dedicationForm) {
+    dedicationForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const title = document.getElementById('dedication-title').value.trim();
+        const content = document.getElementById('dedication-content').value.trim();
+        const file = dedicationPhotoInput && dedicationPhotoInput.files && dedicationPhotoInput.files[0];
+        const submitButton = dedicationForm.querySelector('button[type="submit"]');
+
+        if (!supabaseReady) {
+            setStatus(dedicationStatus, 'Falta conectar Supabase. Consulta SUPABASE_SETUP.md para activar las dedicatorias compartidas.');
+            return;
+        }
+        if (!title || !content) {
+            setStatus(dedicationStatus, 'Escribe un título y el poema antes de guardarlo.');
+            return;
+        }
+
+        if (submitButton) submitButton.disabled = true;
+        setStatus(dedicationStatus, 'Guardando su dedicatoria...');
+        let imagePath = null;
+        try {
+            if (file) imagePath = await uploadSharedPhoto(file, 'dedications');
+            await supabaseRequest('/rest/v1/memories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ kind: 'dedication', title, content, song_url: null, image_path: imagePath })
+            });
+            dedicationForm.reset();
+            if (dedicationPreviewUrl) URL.revokeObjectURL(dedicationPreviewUrl);
+            dedicationPreviewUrl = '';
+            if (dedicationPhotoPreview) {
+                dedicationPhotoPreview.replaceChildren();
+                dedicationPhotoPreview.hidden = true;
+            }
+            setStatus(dedicationStatus, 'La dedicatoria quedó guardada para todos 🤍');
+            try {
+                await loadSharedMemories();
+            } catch {
+                setStatus(dedicationStatus, 'La dedicatoria quedó guardada. Recarga la página para verla 🤍');
+            }
+        } catch (error) {
+            if (imagePath) {
+                try { await deleteSharedPhoto(imagePath); } catch { /* Se conserva el error original. */ }
+            }
+            setStatus(dedicationStatus, error.message || 'No se pudo guardar la dedicatoria.');
+        } finally {
+            if (submitButton) submitButton.disabled = false;
+        }
+    });
+}
+
 async function initializeSharedMemories() {
     if (!supabaseReady) {
         const message = 'Conecta el proyecto Supabase para cargar y guardar recuerdos compartidos. Consulta SUPABASE_SETUP.md.';
         setStatus(diaryStatus, message);
         setStatus(musicStatus, message);
+        setStatus(dedicationStatus, message);
         return;
     }
 
     setStatus(diaryStatus, 'Cargando recuerdos compartidos...');
     setStatus(musicStatus, 'Cargando recuerdos compartidos...');
+    setStatus(dedicationStatus, 'Cargando dedicatorias compartidas...');
     try {
         await loadSharedMemories();
         setStatus(diaryStatus, 'Los registros se comparten con todos los visitantes.');
         setStatus(musicStatus, 'Las canciones y fotos se comparten con todos los visitantes.');
+        setStatus(dedicationStatus, 'Las dedicatorias se comparten con todos los visitantes.');
     } catch (error) {
         setStatus(diaryStatus, error.message || 'No se pudieron cargar los registros compartidos.');
         setStatus(musicStatus, error.message || 'No se pudieron cargar las canciones compartidas.');
+        setStatus(dedicationStatus, error.message || 'No se pudieron cargar las dedicatorias compartidas.');
     }
 }
 

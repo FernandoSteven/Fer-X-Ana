@@ -206,6 +206,57 @@
                     </p>
                     <img src="poema-mil-anos.png" alt="Poema ilustrado: Mil años te amaré" style="width: 100%; max-width: 500px; border-radius: 50px; display: block; margin: 15px auto;" />
                 </div>
+
+                <div class="dedication-box featured-poem">
+                    <h3>Dos meses ♡</h3>
+                    <p class="dedication-text">
+                        Dos meses han pasado volando,<br>
+                        desde que de ti me he enamorado.<br>
+                        A pesar de la distancia,<br>
+                        te siento como mi casa.<br><br>
+
+                        Es increíble la forma en la que conectamos,<br>
+                        algo que en un principio me resultó inesperado.<br>
+                        Tu forma de ser me cautivó<br>
+                        y terminaste conquistando mi corazón.<br><br>
+
+                        Gracias por estar siempre conmigo<br>
+                        y por ser tú,<br>
+                        por convertirte en esa persona<br>
+                        a la que quiero darle todo mi amor<br><br>
+
+                        Y enseñarle a jugar Clash,<br>
+                        aunque te deje ganar,<br>
+                        porque hasta en las cosas más tontas<br>
+                        contigo me encanta estar.<br><br>
+
+                        Te quiero un mundo, mi vida, my loser,<br>
+                        mi persona favorita, mi más bonito querer.<br>
+                        Eres un tonto, pero eres mi tonto.<br><br>
+
+                        Y aunque la distancia nos impida abrazarnos,<br>
+                        me hace feliz saber que tenemos dos corazones que están enamorados.
+                    </p>
+                    <img src="dos-meses.png" alt="Poema ilustrado: Dos meses" style="width: 100%; max-width: 500px; border-radius: 24px; display: block; margin: 15px auto;" />
+                </div>
+
+                <section class="shared-dedications" aria-labelledby="shared-dedications-title">
+                    <h3 id="shared-dedications-title">Poemas que compartimos 🤍</h3>
+                    <p class="helper-text">Escriban una dedicatoria, añadan una foto si quieren y guárdenla aquí para todos. Cualquier visitante puede editar o borrar los poemas publicados.</p>
+                    <form id="dedication-form" class="entry-form">
+                        <label class="field-label" for="dedication-title">Título del poema</label>
+                        <input id="dedication-title" name="title" type="text" maxlength="100" placeholder="Un poema para ti..." required>
+                        <label class="field-label" for="dedication-content">Su dedicatoria</label>
+                        <textarea id="dedication-content" name="content" rows="7" maxlength="3000" placeholder="Escribe aquí lo que quieres dedicar..." required></textarea>
+                        <label class="field-label" for="dedication-photo">Una foto para acompañarlo <span class="optional-label">(opcional)</span></label>
+                        <input id="dedication-photo" class="file-input" name="photo" type="file" accept="image/*">
+                        <div id="dedication-photo-preview" class="upload-preview" hidden></div>
+                        <button class="action-btn" type="submit">Añadir poema y foto ♡</button>
+                        <p id="dedication-status" class="form-status" role="status" aria-live="polite"></p>
+                    </form>
+                    <div id="dedication-empty" class="empty-state">El primer poema que agreguen juntos aparecerá aquí ✨</div>
+                    <div id="dedication-list" class="dedication-list" aria-live="polite"></div>
+                </section>
             
         </div>
 
@@ -262,7 +313,7 @@
                     <button class="action-btn" type="submit">Guardar canción y recuerdo ♡</button>
                     <p id="music-status" class="form-status" role="status" aria-live="polite"></p>
                 </form>
-                <p class="helper-text privacy-note">Las canciones y fotos se publican en la página para que todos puedan verlas.</p>
+                <p class="helper-text privacy-note">Las canciones y fotos se publican para todos. Cualquier visitante puede editar o borrar una publicación.</p>
                 <div id="music-empty" class="empty-state">Su primera canción puede empezar aquí ✨</div>
                 <div id="music-list" class="music-list" aria-live="polite"></div>
             </div>
@@ -281,7 +332,7 @@
                     <button class="action-btn" type="submit">Guardar en nuestro diario ♡</button>
                     <p id="diary-status" class="form-status" role="status" aria-live="polite"></p>
                 </form>
-                <p class="helper-text privacy-note">Los registros se publican en la página para que todos puedan leerlos.</p>
+                <p class="helper-text privacy-note">Los registros se publican para todos. Cualquier visitante puede editar o borrar una publicación.</p>
                 <div id="diary-empty" class="empty-state">Todavía no hay recuerdos guardados. Este espacio es suyo 🤍</div>
                 <div id="diary-list" class="diary-list" aria-live="polite"></div>
             </div>
@@ -292,6 +343,6 @@
                   
     <!-- Vinculación con el archivo JS -->
     <script src="config.js"></script>
-    <script src="script.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>
