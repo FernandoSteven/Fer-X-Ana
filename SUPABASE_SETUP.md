@@ -48,8 +48,8 @@ Los registros que quedaron en el almacenamiento local de un dispositivo no se co
 
 Después de ejecutar setup.sql, abre otra consulta en Supabase SQL Editor y ejecuta completo el archivo supabase/add-gallery-and-pet.sql. Este paso crea la galería compartida, el bucket público para sus fotos y videos, y el cachorro compartido. Cualquier visitante puede agregar, editar y borrar recuerdos de la galería y cambiar los cuidados del cachorro.
 
-El límite de los videos es 50 MB por archivo. Las fotos se optimizan antes de subirlas. La pregunta del día se genera en la página a partir de más de 5,000 combinaciones, y la misma respuesta diaria queda guardada junto a la mascota para ambos.
+El límite de los videos es 50 MB por archivo. Las fotos se optimizan antes de subirlas. Cada día aparecen cinco preguntas tomadas de más de 5,000 combinaciones. Cada pregunta admite dos respuestas con el nombre de quien responde, y al completarlas se agrega una porción de comida al cachorro.
 
 ## Activar el historial de respuestas del cachorro
 
-Después de ejecutar supabase/add-gallery-and-pet.sql, abre otra consulta en Supabase SQL Editor y ejecuta completo supabase/add-pet-answer-history.sql. La página mostrará debajo de la pregunta el historial compartido, con la pregunta, la respuesta y la fecha. El archivo conserva también la última respuesta que ya existía. Cada día se puede guardar una respuesta y una respuesta nueva da una porción de comida al cachorro.
+Después de ejecutar supabase/add-gallery-and-pet.sql, ejecuta supabase/add-pet-answer-history.sql en Supabase SQL Editor. Para activar las cinco preguntas diarias y las dos respuestas de cada una, ejecuta luego supabase/expand-pet-daily-questions.sql. La página conserva las respuestas anteriores y las muestra en el historial; cada pregunta entrega una porción de comida cuando se guardan sus dos respuestas. Cada respuesta pide el nombre de quien respondió, pero el sitio no puede verificar la identidad sin cuentas.

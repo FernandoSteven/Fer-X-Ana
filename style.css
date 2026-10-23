@@ -972,7 +972,12 @@ video.gallery-media {
 }
 .pet-figure[data-outfit="collar"] .clothing-collar,
 .pet-figure[data-outfit="sweater"] .clothing-sweater,
-.pet-figure[data-outfit="bow"] .clothing-bow {
+.pet-figure[data-outfit="bow"] .clothing-bow,
+.pet-figure[data-outfit="pajamas"] .clothing-pajamas,
+.pet-figure[data-outfit="bee"] .clothing-bee,
+.pet-figure[data-outfit="raincoat"] .clothing-raincoat,
+.pet-figure[data-outfit="crown"] .clothing-crown,
+.pet-figure[data-outfit="six-seven"] .clothing-six-seven {
     display: inline;
 }
 .pet-heart {
@@ -1078,6 +1083,65 @@ video.gallery-media {
     background: rgba(255,255,255,.72);
     padding: 15px;
 }
+.pet-question-intro {
+    margin: 7px 0 14px;
+    color: #806b79;
+    font-size: .82rem;
+    line-height: 1.55;
+}
+.pet-daily-questions {
+    display: grid;
+    gap: 12px;
+}
+.pet-daily-question {
+    border: 1px solid #f0dce5;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #fff, #fff8fb);
+    padding: 13px;
+}
+.pet-daily-question-heading {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #fce9f1;
+    color: #a84267;
+    padding: 4px 9px;
+    font-size: .7rem;
+    font-weight: 700;
+}
+.pet-daily-question .pet-question {
+    margin: 8px 0 10px;
+}
+.pet-daily-responses {
+    display: grid;
+    gap: 7px;
+    margin: 0 0 10px;
+}
+.pet-daily-response {
+    border-left: 3px solid #e4a0b8;
+    border-radius: 0 10px 10px 0;
+    background: #fff3f7;
+    padding: 8px 10px;
+}
+.pet-daily-response strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #a84267;
+    font-size: .72rem;
+}
+.pet-daily-response p {
+    margin: 0;
+    color: #72596a;
+    font-size: .82rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.pet-daily-complete {
+    margin: 8px 0 0;
+    color: #8f6478;
+    font-size: .78rem;
+}
 .pet-question-card .section-kicker {
     margin-bottom: 5px;
     font-size: .68rem;
@@ -1141,8 +1205,14 @@ video.gallery-media {
     font-size: .72rem;
     font-weight: 600;
 }
+.pet-history-meta {
+    margin: 6px 0 2px;
+    color: #a66c85;
+    font-size: .7rem;
+    font-weight: 650;
+}
 .pet-history-question {
-    margin: 6px 0 4px;
+    margin: 3px 0 4px;
     color: #684c5e;
     font-size: .86rem;
     font-weight: 650;

@@ -1309,7 +1309,7 @@ if (galleryForm) {
 // --- CACHORRO VIRTUAL COMPARTIDO Y PREGUNTAS DIARIAS ---
 const petStatus = document.getElementById('pet-status');
 const petQuestionStatus = document.getElementById('pet-question-status');
-const petAnswerForm = document.getElementById('pet-answer-form');
+const petDailyQuestionsContainer = document.getElementById('pet-daily-questions');
 const petNameForm = document.getElementById('pet-name-form');
 const petFeedButton = document.getElementById('pet-feed');
 const petAnswerHistoryList = document.getElementById('pet-answer-history');
@@ -1321,7 +1321,12 @@ let petAnswerHistory = [];
 let petHistoryHasMore = false;
 let petHistoryLoadingMore = false;
 let petAnswerSubmitting = false;
+let petControlsEnabled = false;
+let renderedPetQuestionDate = '';
+let renderedPetQuestionSignature = '';
 const petHistoryPageSize = 20;
+const petDailyQuestionLimit = 5;
+const petResponsesPerQuestion = 2;
 
 const petQuestionTopics = [
     'nuestro primer saludo', 'nuestras primeras conversaciones', 'la primera vez que nos reímos juntos',
@@ -1449,10 +1454,148 @@ function petDayKey() {
     return values.year + '-' + values.month + '-' + values.day;
 }
 
-function getDailyPetQuestion() {
+function getDailyPetQuestions() {
     const dayNumber = Math.floor(Date.parse(petDayKey() + 'T00:00:00Z') / 86400000);
-    const index = ((dayNumber * 3721 + 1019) % dailyPetQuestionCount + dailyPetQuestionCount) % dailyPetQuestionCount;
-    return dailyPetQuestions[index];
+    const startIndex = ((dayNumber * 3721 + 1019) % dailyPetQuestionCount + dailyPetQuestionCount) % dailyPetQuestionCount;
+    return Array.from({ length: petDailyQuestionLimit }, (_, offset) =>
+        dailyPetQuestions[(startIndex + offset) % dailyPetQuestionCount]
+    );
+}
+
+function petAnswerHistorySort(entries) {
+    return entries.sort((a, b) => {
+        const byDate = String(b.answered_on).localeCompare(String(a.answered_on));
+        if (byDate) return byDate;
+        const byQuestion = Number(a.question_index || 1) - Number(b.question_index || 1);
+        if (byQuestion) return byQuestion;
+        const byResponse = Number(a.response_index || 1) - Number(b.response_index || 1);
+        if (byResponse) return byResponse;
+        return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+    });
+}
+
+function todayPetAnswersSignature() {
+    const today = petDayKey();
+    return petAnswerHistory
+        .filter(entry => String(entry.answered_on).slice(0, 10) === today)
+        .map(entry => [entry.id, entry.question_index || 1, entry.response_index || 1].join(':'))
+        .sort()
+        .join('|');
+}
+
+function petAnswersForQuestion(questionIndex) {
+    const today = petDayKey();
+    return petAnswerHistory
+        .filter(entry => String(entry.answered_on).slice(0, 10) === today && Number(entry.question_index || 1) === questionIndex)
+        .sort((a, b) => Number(a.response_index || 1) - Number(b.response_index || 1));
+}
+
+function renderDailyPetQuestions({ preserveDrafts = true, skipQuestionIndex = null } = {}) {
+    if (!petDailyQuestionsContainer) return;
+    const drafts = new Map();
+    if (preserveDrafts) {
+        petDailyQuestionsContainer.querySelectorAll('.pet-response-form').forEach(form => {
+            const questionIndex = Number(form.dataset.questionIndex);
+            if (questionIndex === skipQuestionIndex) return;
+            drafts.set(questionIndex, {
+                responder: form.querySelector('[name="responder_name"]')?.value || '',
+                answer: form.querySelector('[name="answer"]')?.value || ''
+            });
+        });
+    }
+
+    const prompts = getDailyPetQuestions();
+    const fragment = document.createDocumentFragment();
+    prompts.forEach((prompt, index) => {
+        const questionIndex = index + 1;
+        const answers = petAnswersForQuestion(questionIndex);
+        const card = document.createElement('article');
+        card.className = 'pet-daily-question';
+        const heading = document.createElement('span');
+        heading.className = 'pet-daily-question-heading';
+        heading.textContent = 'Pregunta ' + questionIndex + ' de ' + petDailyQuestionLimit;
+        const question = document.createElement('p');
+        question.className = 'pet-question';
+        question.textContent = prompt;
+        const answerList = document.createElement('div');
+        answerList.className = 'pet-daily-responses';
+        answers.forEach(entry => {
+            const response = document.createElement('div');
+            response.className = 'pet-daily-response';
+            const byline = document.createElement('strong');
+            const responseIndex = Number(entry.response_index || 1);
+            byline.textContent = 'Respuesta ' + responseIndex + ' de ' + petResponsesPerQuestion + ' · ' + String(entry.responder_name || 'Anónimo');
+            const text = document.createElement('p');
+            text.textContent = entry.answer;
+            response.append(byline, text);
+            answerList.append(response);
+        });
+        card.append(heading, question, answerList);
+
+        if (answers.length < petResponsesPerQuestion) {
+            const form = document.createElement('form');
+            form.className = 'entry-form pet-response-form';
+            form.dataset.questionIndex = String(questionIndex);
+            const nameId = 'pet-responder-' + questionIndex;
+            const answerId = 'pet-answer-' + questionIndex;
+            const nameLabel = document.createElement('label');
+            nameLabel.className = 'field-label';
+            nameLabel.htmlFor = nameId;
+            nameLabel.textContent = 'Quién responde · espacio ' + (answers.length + 1) + ' de ' + petResponsesPerQuestion;
+            const nameInput = document.createElement('input');
+            nameInput.id = nameId;
+            nameInput.name = 'responder_name';
+            nameInput.type = 'text';
+            nameInput.maxLength = 40;
+            nameInput.placeholder = 'Escribe tu nombre';
+            nameInput.required = true;
+            const answerLabel = document.createElement('label');
+            answerLabel.className = 'field-label';
+            answerLabel.htmlFor = answerId;
+            answerLabel.textContent = 'Su respuesta';
+            const answerInput = document.createElement('textarea');
+            answerInput.id = answerId;
+            answerInput.name = 'answer';
+            answerInput.rows = 3;
+            answerInput.maxLength = 500;
+            answerInput.placeholder = 'Cuéntense algo bonito…';
+            answerInput.required = true;
+            const submit = document.createElement('button');
+            submit.className = 'action-btn';
+            submit.type = 'submit';
+            submit.textContent = 'Guardar respuesta ✨';
+            submit.disabled = !petControlsEnabled || petAnswerSubmitting;
+            nameInput.disabled = !petControlsEnabled || petAnswerSubmitting;
+            answerInput.disabled = !petControlsEnabled || petAnswerSubmitting;
+            const draft = drafts.get(questionIndex);
+            if (draft) {
+                nameInput.value = draft.responder;
+                answerInput.value = draft.answer;
+            }
+            form.append(nameLabel, nameInput, answerLabel, answerInput, submit);
+            form.addEventListener('submit', event => handlePetAnswerSubmit(form, event));
+            card.append(form);
+        } else {
+            const complete = document.createElement('p');
+            complete.className = 'pet-daily-complete';
+            complete.textContent = '¡Esta pregunta ya tiene sus dos respuestas! Ganaron una porción para el cachorro 🦴';
+            card.append(complete);
+        }
+        fragment.append(card);
+    });
+    petDailyQuestionsContainer.replaceChildren(fragment);
+    renderedPetQuestionDate = petDayKey();
+    renderedPetQuestionSignature = todayPetAnswersSignature();
+}
+
+function renderDailyPetQuestionsIfChanged() {
+    const today = petDayKey();
+    const signature = todayPetAnswersSignature();
+    if (renderedPetQuestionDate !== today) {
+        renderDailyPetQuestions({ preserveDrafts: false });
+    } else if (renderedPetQuestionSignature !== signature) {
+        renderDailyPetQuestions();
+    }
 }
 
 function daysBetweenPetDates(start, end) {
@@ -1473,17 +1616,14 @@ function renderPet() {
     if (!sharedPet) return;
     const today = petDayKey();
     const name = String(sharedPet.name || 'Nube');
-    const outfit = ['none', 'collar', 'sweater', 'bow'].includes(sharedPet.outfit) ? sharedPet.outfit : 'none';
+    const outfits = ['none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven'];
+    const outfit = outfits.includes(sharedPet.outfit) ? sharedPet.outfit : 'none';
     const figure = document.getElementById('pet-figure');
     const nameDisplay = document.getElementById('pet-name-display');
     const nameInput = document.getElementById('pet-name-input');
     const weightDisplay = document.getElementById('pet-weight');
     const foodDisplay = document.getElementById('pet-food');
     const mood = document.getElementById('pet-mood');
-    const answerSaved = document.getElementById('pet-answer-saved');
-    const question = document.getElementById('pet-question');
-    const answerButton = petAnswerForm && petAnswerForm.querySelector('button[type="submit"]');
-    const alreadyAnswered = sharedPet.last_answered_on === today;
     const alreadyFed = sharedPet.last_fed_on === today;
     const foodCount = Math.max(0, Number(sharedPet.food_count) || 0);
     const weight = currentPetWeight(sharedPet, today);
@@ -1493,30 +1633,20 @@ function renderPet() {
     if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
     if (weightDisplay) weightDisplay.textContent = weight.toFixed(1) + ' kg';
     if (foodDisplay) foodDisplay.textContent = foodCount + (foodCount === 1 ? ' porción' : ' porciones');
-    if (question) question.textContent = getDailyPetQuestion();
-    if (answerSaved) {
-        const answer = alreadyAnswered ? String(sharedPet.last_answer || '') : '';
-        answerSaved.hidden = !answer;
-        answerSaved.textContent = answer ? 'Lo que respondimos hoy: “' + answer + '”' : '';
-    }
-    if (answerButton) answerButton.disabled = alreadyAnswered || petAnswerSubmitting;
-    if (petAnswerForm) {
-        const answerInput = document.getElementById('pet-answer');
-        if (answerInput) answerInput.disabled = alreadyAnswered;
-    }
+    renderDailyPetQuestionsIfChanged();
     if (petFeedButton) {
         petFeedButton.disabled = foodCount < 1 || alreadyFed;
         petFeedButton.textContent = alreadyFed ? 'Ya comió hoy 🤍' : 'Dar de comer 🦴';
     }
     if (mood) {
         if (daysBetweenPetDates(sharedPet.last_fed_on, today) >= 2) {
-            mood.textContent = 'Tiene mucha hambre; una respuesta bonita le dará comida 🥺';
+            mood.textContent = 'Tiene mucha hambre; completar una pregunta le dará comida 🥺';
         } else if (alreadyFed) {
             mood.textContent = 'Está feliz y con la pancita llena 🤍';
         } else if (foodCount > 0) {
             mood.textContent = '¡Ya tiene comida! Regálenle una porción 🦴';
         } else {
-            mood.textContent = 'Está esperando su pregunta bonita de hoy ✨';
+            mood.textContent = 'Está esperando que contesten juntitos ✨';
         }
     }
     document.querySelectorAll('[data-pet-outfit]').forEach(button => {
@@ -1565,10 +1695,13 @@ function renderPetAnswerHistory() {
             const question = document.createElement('p');
             question.className = 'pet-history-question';
             question.textContent = entry.question;
+            const responseMeta = document.createElement('p');
+            responseMeta.className = 'pet-history-meta';
+            responseMeta.textContent = 'Pregunta ' + Number(entry.question_index || 1) + ' · Respuesta ' + Number(entry.response_index || 1) + ' de ' + petResponsesPerQuestion + ' · ' + String(entry.responder_name || 'Anónimo');
             const answer = document.createElement('p');
             answer.className = 'pet-history-answer';
             answer.textContent = entry.answer;
-            item.append(date, question, answer);
+            item.append(date, responseMeta, question, answer);
             petAnswerHistoryList.append(item);
         });
     }
@@ -1581,9 +1714,9 @@ function renderPetAnswerHistory() {
 
 function petHistorySetupHint(error) {
     if (error && (error.status === 404 || error.status === 406)) {
-        return 'Falta activar el historial. Ejecuta supabase/add-pet-answer-history.sql en Supabase > SQL Editor.';
+        return 'Falta actualizar el historial. Ejecuta supabase/expand-pet-daily-questions.sql en Supabase > SQL Editor.';
     }
-    return (error && error.message ? error.message : 'No se pudo cargar el historial.') + ' Ejecuta supabase/add-pet-answer-history.sql en Supabase > SQL Editor si aún no lo has hecho.';
+    return (error && error.message ? error.message : 'No se pudo cargar el historial.') + ' Ejecuta supabase/expand-pet-daily-questions.sql en Supabase > SQL Editor si aún no lo has hecho.';
 }
 
 async function loadPetAnswerHistory({ older = false } = {}) {
@@ -1599,19 +1732,21 @@ async function loadPetAnswerHistory({ older = false } = {}) {
             : '';
         const filter = older && oldestDate ? '&answered_on=lt.' + encodeURIComponent(oldestDate) : '';
         const rows = await supabaseRequest(
-            '/rest/v1/pet_answer_history?select=id,question,answer,answered_on,created_at' + filter +
-            '&order=answered_on.desc&limit=' + petHistoryPageSize
+            '/rest/v1/pet_answer_history?select=id,question,answer,answered_on,created_at,question_index,response_index,responder_name' + filter +
+            '&order=answered_on.desc,question_index.asc,response_index.asc&limit=' + petHistoryPageSize
         );
         const fetched = Array.isArray(rows) ? rows : [];
         if (older) {
-            petAnswerHistory = petAnswerHistory.concat(fetched);
+            const byId = new Map(petAnswerHistory.concat(fetched).map(entry => [entry.id, entry]));
+            petAnswerHistory = petAnswerHistorySort(Array.from(byId.values()));
         } else {
             const byId = new Map(fetched.concat(petAnswerHistory).map(entry => [entry.id, entry]));
-            petAnswerHistory = Array.from(byId.values()).sort((a, b) => String(b.answered_on).localeCompare(String(a.answered_on)));
+            petAnswerHistory = petAnswerHistorySort(Array.from(byId.values()));
         }
         petHistoryHasMore = fetched.length === petHistoryPageSize;
         if (petAnswerHistoryStatus) petAnswerHistoryStatus.textContent = '';
         renderPetAnswerHistory();
+        renderDailyPetQuestionsIfChanged();
     } catch (error) {
         if (petAnswerHistoryStatus) petAnswerHistoryStatus.textContent = petHistorySetupHint(error);
         if (!older) renderPetAnswerHistory();
@@ -1672,67 +1807,82 @@ document.querySelectorAll('[data-pet-outfit]').forEach(button => {
     });
 });
 
-if (petAnswerForm) {
-    petAnswerForm.addEventListener('submit', async event => {
-        event.preventDefault();
-        if (!sharedPet || !supabaseReady) return;
-        const answerInput = document.getElementById('pet-answer');
-        const answer = answerInput.value.trim();
-        if (answer.length < 3) {
-            setStatus(petQuestionStatus, 'Escriban una respuesta un poquito más larga 🤍');
-            return;
+async function handlePetAnswerSubmit(form, event) {
+    event.preventDefault();
+    if (!sharedPet || !supabaseReady || petAnswerSubmitting) return;
+    const questionIndex = Number(form.dataset.questionIndex);
+    const nameInput = form.querySelector('[name="responder_name"]');
+    const answerInput = form.querySelector('[name="answer"]');
+    const responderName = nameInput.value.trim();
+    const answer = answerInput.value.trim();
+    if (responderName.length < 1) {
+        setStatus(petQuestionStatus, 'Escriban el nombre de quien responde 🤍');
+        return;
+    }
+    if (answer.length < 3) {
+        setStatus(petQuestionStatus, 'Escriban una respuesta un poquito más larga 🤍');
+        return;
+    }
+    const today = petDayKey();
+    const savedAnswers = petAnswersForQuestion(questionIndex);
+    if (questionIndex < 1 || questionIndex > petDailyQuestionLimit || savedAnswers.length >= petResponsesPerQuestion) {
+        setStatus(petQuestionStatus, 'Esta pregunta ya tiene sus dos espacios ocupados. Elijan otra de las cinco 🤍');
+        await loadPetAnswerHistory();
+        return;
+    }
+    const responseIndex = savedAnswers.length + 1;
+    const question = getDailyPetQuestions()[questionIndex - 1];
+    const foodCount = Math.max(0, Number(sharedPet.food_count) || 0);
+    petAnswerSubmitting = true;
+    document.querySelectorAll('.pet-response-form button').forEach(button => { button.disabled = true; });
+    setStatus(petQuestionStatus, 'Guardando la respuesta de ' + responderName + '…');
+    try {
+        const rows = await supabaseRequest('/rest/v1/pet_answer_history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify({
+                question,
+                answer,
+                answered_on: today,
+                question_index: questionIndex,
+                response_index: responseIndex,
+                responder_name: responderName
+            })
+        });
+        const savedEntry = Array.isArray(rows) ? rows[0] : null;
+        if (savedEntry) {
+            const byId = new Map([savedEntry, ...petAnswerHistory].map(entry => [entry.id, entry]));
+            petAnswerHistory = petAnswerHistorySort(Array.from(byId.values()));
+            renderPetAnswerHistory();
+            renderDailyPetQuestions({ skipQuestionIndex: questionIndex });
+        } else {
+            await loadPetAnswerHistory();
         }
-        const today = petDayKey();
-        if (sharedPet.last_answered_on === today) {
-            setStatus(petQuestionStatus, 'La pregunta de hoy ya quedó respondida. Mañana habrá otra ✨');
-            renderPet();
-            return;
+        if (responseIndex === petResponsesPerQuestion) sharedPet.food_count = foodCount + 1;
+        sharedPet.last_answered_on = today;
+        sharedPet.last_answer = answer;
+        renderPet();
+        setStatus(petQuestionStatus, responseIndex === petResponsesPerQuestion
+            ? '¡Ya respondieron los dos! Ganaron una porción para su cachorrito 🦴'
+            : '¡Respuesta guardada! Falta la segunda respuesta para ganar su porción 🤍');
+    } catch (error) {
+        if (error.status === 409) {
+            await Promise.all([loadPetState().catch(() => {}), loadPetAnswerHistory()]);
+            setStatus(petQuestionStatus, 'Ese espacio se completó hace un momento. Revisen las respuestas y usen el espacio que sigue 🤍');
+        } else if (error.status === 400 || error.status === 404 || error.status === 406) {
+            setStatus(petQuestionStatus, 'No se pudo guardar. Ejecuta supabase/expand-pet-daily-questions.sql en Supabase > SQL Editor y vuelve a intentarlo.');
+        } else {
+            setStatus(petQuestionStatus, error.message || 'No se pudo guardar la respuesta.');
         }
-        const button = petAnswerForm.querySelector('button[type="submit"]');
-        button.disabled = true;
-        setStatus(petQuestionStatus, 'Guardando su respuesta y preparando una porción...');
-        petAnswerSubmitting = true;
-        try {
-            const foodCount = Math.max(0, Number(sharedPet.food_count) || 0);
-            const rows = await supabaseRequest('/rest/v1/pet_answer_history', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-                body: JSON.stringify({
-                    question: getDailyPetQuestion(),
-                    answer,
-                    answered_on: today
-                })
-            });
-            const savedEntry = Array.isArray(rows) ? rows[0] : null;
-            if (savedEntry) {
-                const byId = new Map([savedEntry, ...petAnswerHistory].map(entry => [entry.id, entry]));
-                petAnswerHistory = Array.from(byId.values()).sort((a, b) => String(b.answered_on).localeCompare(String(a.answered_on)));
-                renderPetAnswerHistory();
-            } else {
-                await loadPetAnswerHistory();
-            }
-            sharedPet.food_count = foodCount + 1;
-            sharedPet.last_answered_on = today;
-            sharedPet.last_answer = answer;
-            answerInput.value = '';
-            renderPet();
-            setStatus(petQuestionStatus, '¡Respuesta guardada! Ganaron una porción para su cachorrito 🦴');
-        } catch (error) {
-            if (error.status === 409) {
-                await Promise.all([loadPetState().catch(() => {}), loadPetAnswerHistory()]);
-                setStatus(petQuestionStatus, 'La respuesta de hoy ya quedó guardada por alguien. Mañana habrá otra ✨');
-                if (sharedPet) sharedPet.last_answered_on = today;
-            } else if (error.status === 404 || error.status === 406) {
-                setStatus(petQuestionStatus, 'Falta activar el historial. Ejecuta supabase/add-pet-answer-history.sql en Supabase > SQL Editor.');
-            } else {
-                setStatus(petQuestionStatus, error.message || 'No se pudo guardar la respuesta.');
-            }
-        } finally {
-            petAnswerSubmitting = false;
-            renderPet();
-            button.disabled = sharedPet.last_answered_on === today;
-        }
-    });
+    } finally {
+        petAnswerSubmitting = false;
+        renderDailyPetQuestions();
+        renderPet();
+    }
+}
+
+if (petDailyQuestionsContainer) {
+    renderDailyPetQuestions({ preserveDrafts: false });
 }
 
 if (petFeedButton) {
@@ -1776,9 +1926,15 @@ async function initializeGallery() {
 }
 
 function setPetControlsEnabled(enabled) {
-    document.querySelectorAll('#pet-name-input, #pet-name-form button, [data-pet-outfit], #pet-answer, #pet-answer-form button').forEach(control => {
+    petControlsEnabled = enabled;
+    document.querySelectorAll('#pet-name-input, #pet-name-form button, [data-pet-outfit]').forEach(control => {
         control.disabled = !enabled;
     });
+    if (petDailyQuestionsContainer) {
+        petDailyQuestionsContainer.querySelectorAll('input, textarea, button').forEach(control => {
+            control.disabled = !enabled || petAnswerSubmitting;
+        });
+    }
     if (!enabled && petFeedButton) petFeedButton.disabled = true;
     if (enabled) renderPet();
 }
@@ -1797,11 +1953,7 @@ async function initializePet() {
         await loadPetAnswerHistory();
         setPetControlsEnabled(true);
         setStatus(petStatus, 'El nombre, la ropita y sus cuidados se comparten entre ustedes 🤍');
-        if (sharedPet.last_answered_on === petDayKey()) {
-            setStatus(petQuestionStatus, 'La pregunta de hoy ya quedó respondida. Mañana habrá otra ✨');
-        } else {
-            setStatus(petQuestionStatus, 'Respondan la pregunta para ganar una porción de comida.');
-        }
+        setStatus(petQuestionStatus, 'Respondan hasta cinco preguntas de hoy; cada una tiene dos espacios y da una porción cuando responden ambos 🤍');
     } catch (error) {
         const message = (error.message || 'No se pudo cargar el cachorro.') + ' Ejecuta supabase/add-gallery-and-pet.sql en Supabase > SQL Editor.';
         setStatus(petStatus, message);
