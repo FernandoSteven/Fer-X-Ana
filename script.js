@@ -1312,7 +1312,16 @@ const petQuestionStatus = document.getElementById('pet-question-status');
 const petAnswerForm = document.getElementById('pet-answer-form');
 const petNameForm = document.getElementById('pet-name-form');
 const petFeedButton = document.getElementById('pet-feed');
+const petAnswerHistoryList = document.getElementById('pet-answer-history');
+const petAnswerHistoryStatus = document.getElementById('pet-answer-history-status');
+const petAnswerHistoryCount = document.getElementById('pet-answer-history-count');
+const petAnswerHistoryMore = document.getElementById('pet-answer-history-more');
 let sharedPet = null;
+let petAnswerHistory = [];
+let petHistoryHasMore = false;
+let petHistoryLoadingMore = false;
+let petAnswerSubmitting = false;
+const petHistoryPageSize = 20;
 
 const petQuestionTopics = [
     'nuestro primer saludo', 'nuestras primeras conversaciones', 'la primera vez que nos reímos juntos',
@@ -1490,7 +1499,7 @@ function renderPet() {
         answerSaved.hidden = !answer;
         answerSaved.textContent = answer ? 'Lo que respondimos hoy: “' + answer + '”' : '';
     }
-    if (answerButton) answerButton.disabled = alreadyAnswered;
+    if (answerButton) answerButton.disabled = alreadyAnswered || petAnswerSubmitting;
     if (petAnswerForm) {
         const answerInput = document.getElementById('pet-answer');
         if (answerInput) answerInput.disabled = alreadyAnswered;
@@ -1523,6 +1532,98 @@ async function loadPetState() {
     renderPet();
 }
 
+function formatPetHistoryDate(value) {
+    const date = new Date(String(value).slice(0, 10) + 'T12:00:00');
+    return new Intl.DateTimeFormat('es-EC', {
+        timeZone: 'Pacific/Galapagos',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    }).format(date);
+}
+
+function renderPetAnswerHistory() {
+    if (!petAnswerHistoryList) return;
+    petAnswerHistoryList.replaceChildren();
+    if (petAnswerHistoryCount) {
+        const count = petAnswerHistory.length;
+        petAnswerHistoryCount.textContent = count + (count === 1 ? ' respuesta guardada' : ' respuestas guardadas');
+    }
+    if (petAnswerHistory.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'pet-history-empty';
+        empty.textContent = 'Todavía no hay respuestas. La primera quedará guardada aquí 🤍';
+        petAnswerHistoryList.append(empty);
+    } else {
+        petAnswerHistory.forEach(entry => {
+            const item = document.createElement('li');
+            item.className = 'pet-history-entry';
+            const date = document.createElement('time');
+            date.className = 'pet-history-date';
+            date.dateTime = String(entry.answered_on).slice(0, 10);
+            date.textContent = formatPetHistoryDate(entry.answered_on);
+            const question = document.createElement('p');
+            question.className = 'pet-history-question';
+            question.textContent = entry.question;
+            const answer = document.createElement('p');
+            answer.className = 'pet-history-answer';
+            answer.textContent = entry.answer;
+            item.append(date, question, answer);
+            petAnswerHistoryList.append(item);
+        });
+    }
+    if (petAnswerHistoryMore) {
+        petAnswerHistoryMore.hidden = !petHistoryHasMore;
+        petAnswerHistoryMore.disabled = petHistoryLoadingMore;
+        petAnswerHistoryMore.textContent = petHistoryLoadingMore ? 'Cargando…' : 'Ver respuestas anteriores';
+    }
+}
+
+function petHistorySetupHint(error) {
+    if (error && (error.status === 404 || error.status === 406)) {
+        return 'Falta activar el historial. Ejecuta supabase/add-pet-answer-history.sql en Supabase > SQL Editor.';
+    }
+    return (error && error.message ? error.message : 'No se pudo cargar el historial.') + ' Ejecuta supabase/add-pet-answer-history.sql en Supabase > SQL Editor si aún no lo has hecho.';
+}
+
+async function loadPetAnswerHistory({ older = false } = {}) {
+    if (!supabaseReady || !petAnswerHistoryList) return;
+    if (older && (petHistoryLoadingMore || !petHistoryHasMore || petAnswerHistory.length === 0)) return;
+    if (older) {
+        petHistoryLoadingMore = true;
+        renderPetAnswerHistory();
+    }
+    try {
+        const oldestDate = petAnswerHistory.length
+            ? String(petAnswerHistory[petAnswerHistory.length - 1].answered_on).slice(0, 10)
+            : '';
+        const filter = older && oldestDate ? '&answered_on=lt.' + encodeURIComponent(oldestDate) : '';
+        const rows = await supabaseRequest(
+            '/rest/v1/pet_answer_history?select=id,question,answer,answered_on,created_at' + filter +
+            '&order=answered_on.desc&limit=' + petHistoryPageSize
+        );
+        const fetched = Array.isArray(rows) ? rows : [];
+        if (older) {
+            petAnswerHistory = petAnswerHistory.concat(fetched);
+        } else {
+            const byId = new Map(fetched.concat(petAnswerHistory).map(entry => [entry.id, entry]));
+            petAnswerHistory = Array.from(byId.values()).sort((a, b) => String(b.answered_on).localeCompare(String(a.answered_on)));
+        }
+        petHistoryHasMore = fetched.length === petHistoryPageSize;
+        if (petAnswerHistoryStatus) petAnswerHistoryStatus.textContent = '';
+        renderPetAnswerHistory();
+    } catch (error) {
+        if (petAnswerHistoryStatus) petAnswerHistoryStatus.textContent = petHistorySetupHint(error);
+        if (!older) renderPetAnswerHistory();
+    } finally {
+        petHistoryLoadingMore = false;
+        renderPetAnswerHistory();
+    }
+}
+
+if (petAnswerHistoryMore) {
+    petAnswerHistoryMore.addEventListener('click', () => loadPetAnswerHistory({ older: true }));
+}
 async function savePetChanges(changes, successMessage) {
     await supabaseRequest('/rest/v1/shared_pet?id=eq.1', {
         method: 'PATCH',
@@ -1590,17 +1691,26 @@ if (petAnswerForm) {
         const button = petAnswerForm.querySelector('button[type="submit"]');
         button.disabled = true;
         setStatus(petQuestionStatus, 'Guardando su respuesta y preparando una porción...');
+        petAnswerSubmitting = true;
         try {
             const foodCount = Math.max(0, Number(sharedPet.food_count) || 0);
-            await supabaseRequest('/rest/v1/shared_pet?id=eq.1', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            const rows = await supabaseRequest('/rest/v1/pet_answer_history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
                 body: JSON.stringify({
-                    food_count: foodCount + 1,
-                    last_answered_on: today,
-                    last_answer: answer
+                    question: getDailyPetQuestion(),
+                    answer,
+                    answered_on: today
                 })
             });
+            const savedEntry = Array.isArray(rows) ? rows[0] : null;
+            if (savedEntry) {
+                const byId = new Map([savedEntry, ...petAnswerHistory].map(entry => [entry.id, entry]));
+                petAnswerHistory = Array.from(byId.values()).sort((a, b) => String(b.answered_on).localeCompare(String(a.answered_on)));
+                renderPetAnswerHistory();
+            } else {
+                await loadPetAnswerHistory();
+            }
             sharedPet.food_count = foodCount + 1;
             sharedPet.last_answered_on = today;
             sharedPet.last_answer = answer;
@@ -1608,8 +1718,18 @@ if (petAnswerForm) {
             renderPet();
             setStatus(petQuestionStatus, '¡Respuesta guardada! Ganaron una porción para su cachorrito 🦴');
         } catch (error) {
-            setStatus(petQuestionStatus, error.message || 'No se pudo guardar la respuesta.');
+            if (error.status === 409) {
+                await Promise.all([loadPetState().catch(() => {}), loadPetAnswerHistory()]);
+                setStatus(petQuestionStatus, 'La respuesta de hoy ya quedó guardada por alguien. Mañana habrá otra ✨');
+                if (sharedPet) sharedPet.last_answered_on = today;
+            } else if (error.status === 404 || error.status === 406) {
+                setStatus(petQuestionStatus, 'Falta activar el historial. Ejecuta supabase/add-pet-answer-history.sql en Supabase > SQL Editor.');
+            } else {
+                setStatus(petQuestionStatus, error.message || 'No se pudo guardar la respuesta.');
+            }
         } finally {
+            petAnswerSubmitting = false;
+            renderPet();
             button.disabled = sharedPet.last_answered_on === today;
         }
     });
@@ -1674,6 +1794,7 @@ async function initializePet() {
     try {
         await loadPetState();
         if (!sharedPet) throw new Error('No se encontró el cachorro compartido.');
+        await loadPetAnswerHistory();
         setPetControlsEnabled(true);
         setStatus(petStatus, 'El nombre, la ropita y sus cuidados se comparten entre ustedes 🤍');
         if (sharedPet.last_answered_on === petDayKey()) {
@@ -1694,6 +1815,7 @@ if (supabaseReady) {
     setInterval(() => {
         if (!editingGalleryId) loadGalleryItems().catch(() => {});
         loadPetState().catch(() => {});
+        loadPetAnswerHistory();
     }, 30000);
     setInterval(renderPet, 60000);
 }

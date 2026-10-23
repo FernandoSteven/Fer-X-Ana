@@ -1097,6 +1097,81 @@ video.gallery-media {
 .pet-question-card .action-btn {
     justify-self: stretch;
 }
+.pet-answer-history {
+    margin-top: 20px;
+    padding-top: 17px;
+    border-top: 1px solid #f0dce5;
+}
+.pet-history-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+}
+.pet-history-heading .section-kicker {
+    margin: 0 0 4px;
+    font-size: .65rem;
+}
+.pet-history-heading h4 {
+    margin: 0;
+    color: #a84267;
+    font-size: 1rem;
+}
+.pet-history-count {
+    flex: 0 0 auto;
+    color: #947184;
+    font-size: .72rem;
+}
+.pet-history-list {
+    display: grid;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.pet-history-entry,
+.pet-history-empty {
+    border: 1px solid #f0dce5;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fffafd, #fff4f8);
+    padding: 12px 14px;
+}
+.pet-history-date {
+    color: #a66c85;
+    font-size: .72rem;
+    font-weight: 600;
+}
+.pet-history-question {
+    margin: 6px 0 4px;
+    color: #684c5e;
+    font-size: .86rem;
+    font-weight: 650;
+    line-height: 1.5;
+}
+.pet-history-answer {
+    margin: 0;
+    color: #806071;
+    font-size: .84rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.pet-history-empty {
+    color: #947184;
+    font-size: .83rem;
+    line-height: 1.55;
+}
+.pet-history-more {
+    display: block;
+    margin: 12px auto 0;
+}
+.pet-history-more[hidden] {
+    display: none;
+}
+.pet-answer-history .form-status {
+    margin: 8px 0;
+    font-size: .78rem;
+}
 .gallery-card,
 .pet-card {
     overflow: hidden;

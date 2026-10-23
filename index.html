@@ -411,6 +411,18 @@
                             <p id="pet-question" class="pet-question">Preparando su pregunta bonita…</p>
                             <p id="pet-answer-saved" class="pet-answer-saved" hidden></p>
                             <form id="pet-answer-form" class="entry-form"><label class="field-label" for="pet-answer">Su respuesta</label><textarea id="pet-answer" rows="3" maxlength="500" placeholder="Cuéntense algo bonito…" required></textarea><button class="action-btn" type="submit">Responder y ganar comida ✨</button><p id="pet-question-status" class="form-status" role="status" aria-live="polite"></p></form>
+                            <section class="pet-answer-history" aria-labelledby="pet-answer-history-title">
+                                <div class="pet-history-heading">
+                                    <div>
+                                        <span class="section-kicker">Sus recuerdos compartidos</span>
+                                        <h4 id="pet-answer-history-title">Historial de respuestas 💌</h4>
+                                    </div>
+                                    <span id="pet-answer-history-count" class="pet-history-count">Cargando…</span>
+                                </div>
+                                <p id="pet-answer-history-status" class="form-status" role="status" aria-live="polite"></p>
+                                <ol id="pet-answer-history" class="pet-history-list" aria-live="polite"></ol>
+                                <button id="pet-answer-history-more" class="memory-action-btn pet-history-more" type="button" hidden>Ver respuestas anteriores</button>
+                            </section>
                         </div>
                     </section>
                 </div>
@@ -420,6 +432,6 @@
     </div>
     <!-- Vinculación con el archivo JS -->
     <script src="config.js"></script>
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
 </body>
 </html>
