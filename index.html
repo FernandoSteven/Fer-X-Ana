@@ -26,6 +26,8 @@
         <button class="tab-btn" onclick="openTab(event, 'tab4')" role="tab" aria-controls="tab4" aria-selected="false">Cuenta regresiva 💞</button>
         <button class="tab-btn" onclick="openTab(event, 'tab5')" role="tab" aria-controls="tab5" aria-selected="false">Nuestra música juntos 🎶</button>
         <button class="tab-btn" onclick="openTab(event, 'tab6')" role="tab" aria-controls="tab6" aria-selected="false">Diario de nosotros 📔</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab7')" role="tab" aria-controls="tab7" aria-selected="false">Galería 📸</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab8')" role="tab" aria-controls="tab8" aria-selected="false">Nuestro cachorrito 🐶</button>
     </div>
     <!-- Contenido de las pestañas -->
     <div class="container">
@@ -341,8 +343,83 @@
     </div>
 
                   
+    <div class="container">
+        <div id="tab7" class="tab-content">
+            <div class="card gallery-card">
+                <span class="section-kicker">Un álbum para volver a cada instante</span>
+                <h2>Nuestra galería 📸</h2>
+                <p>Suban fotos y videos de sus momentos juntos. Cada recuerdo se comparte en esta página y se puede editar o borrar.</p>
+                <form id="gallery-form" class="entry-form">
+                    <label class="field-label" for="gallery-title">Título del recuerdo</label>
+                    <input id="gallery-title" name="title" type="text" maxlength="100" placeholder="Un día para recordar..." required>
+                    <label class="field-label" for="gallery-caption">Lo que quieren recordar <span class="optional-label">(opcional)</span></label>
+                    <textarea id="gallery-caption" name="caption" rows="3" maxlength="1500" placeholder="Escribe una pequeña historia para esta foto o video..."></textarea>
+                    <label class="field-label" for="gallery-file">Elijan una foto o un video</label>
+                    <input id="gallery-file" class="file-input" name="media" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" required>
+                    <p class="helper-text">Las fotos se optimizan al subirlas. Los videos pueden pesar hasta 50 MB (MP4, WebM o MOV).</p>
+                    <div id="gallery-preview" class="upload-preview" hidden></div>
+                    <button class="action-btn" type="submit">Guardar en nuestra galería ♡</button>
+                    <p id="gallery-status" class="form-status" role="status" aria-live="polite"></p>
+                </form>
+                <div id="gallery-empty" class="empty-state">Aquí aparecerán sus fotos y videos favoritos ✨</div>
+                <div id="gallery-list" class="gallery-list" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <div id="tab8" class="tab-content">
+            <div class="card pet-card">
+                <span class="section-kicker">Un pequeño amor para cuidar entre los dos</span>
+                <h2>Nuestro cachorrito 🐶</h2>
+                <p>Respondan la pregunta del día para conseguir una porción de comida. Si pasa un día sin alimentarlo, su peso bajará poquito a poquito.</p>
+                <div class="pet-layout">
+                    <section class="pet-home" aria-label="Estado de nuestro cachorro">
+                        <div id="pet-figure" class="pet-figure" data-outfit="none" role="img" aria-label="Un cachorrito pequeño">
+                            <svg viewBox="0 0 280 280" aria-hidden="true" focusable="false">
+                                <ellipse cx="140" cy="253" rx="88" ry="14" fill="#d8afbd" opacity=".32" />
+                                <ellipse cx="140" cy="194" rx="72" ry="61" fill="#f1c8a5" />
+                                <ellipse cx="91" cy="227" rx="24" ry="19" fill="#f7dfc9" /><ellipse cx="189" cy="227" rx="24" ry="19" fill="#f7dfc9" />
+                                <path d="M190 199c33 3 34 38 17 43-12 4-17-6-10-13 7-7 5-16-7-18" fill="none" stroke="#b77c63" stroke-width="13" stroke-linecap="round" />
+                                <ellipse cx="139" cy="128" rx="78" ry="70" fill="#f6d8bd" />
+                                <path d="M78 103C44 74 42 148 77 159c17 5 25-13 19-32M201 103c34-29 36 45 1 56-17 5-25-13-19-32" fill="#b97c64" />
+                                <path d="M78 108c-16-13-17 30 2 38m122-38c16-13 17 30-2 38" fill="none" stroke="#e8b29f" stroke-width="8" stroke-linecap="round" />
+                                <ellipse cx="139" cy="145" rx="48" ry="34" fill="#fff0df" />
+                                <ellipse cx="110" cy="124" rx="6" ry="8" fill="#513d43" /><ellipse cx="168" cy="124" rx="6" ry="8" fill="#513d43" />
+                                <circle cx="112" cy="121" r="2" fill="#fff" /><circle cx="170" cy="121" r="2" fill="#fff" />
+                                <ellipse cx="139" cy="145" rx="10" ry="7" fill="#61414a" />
+                                <path d="M139 151c-2 10-14 12-19 5m19-5c2 10 14 12 19 5" fill="none" stroke="#8f5d63" stroke-width="3" stroke-linecap="round" />
+                                <circle cx="91" cy="148" r="8" fill="#ed9c9e" opacity=".45" /><circle cx="187" cy="148" r="8" fill="#ed9c9e" opacity=".45" />
+                                <path d="M96 177c20 16 67 16 87 0" fill="none" stroke="#e4b89c" stroke-width="4" stroke-linecap="round" />
+                                <g class="pet-clothing clothing-collar"><path d="M91 177c25 18 72 18 97 0l-8 23c-25 15-57 15-82 0z" fill="#db6790" /><circle cx="140" cy="198" r="8" fill="#f8d16c" /></g>
+                                <g class="pet-clothing clothing-sweater"><path d="M83 177c32 23 83 23 114 0l20 48c-15 18-136 18-153 0z" fill="#a9b8df" /><path d="M94 190h92m-97 15h102" stroke="#e5e8f8" stroke-width="5" stroke-linecap="round" /></g>
+                                <g class="pet-clothing clothing-bow"><path d="M187 92c-19-22-35-1-10 12-24 11-5 32 13 12 17 19 38-1 12-13 25-13 5-33-15-11z" fill="#e886a2" stroke="#fff3f7" stroke-width="3" /><circle cx="190" cy="105" r="6" fill="#f9d46f" /></g>
+                            </svg>
+                            <span class="pet-heart pet-heart-one">♥</span><span class="pet-heart pet-heart-two">♥</span>
+                        </div>
+                        <h3 id="pet-name-display" class="pet-name">Nube</h3>
+                        <p id="pet-mood" class="pet-mood">Está feliz de estar con ustedes 🤍</p>
+                        <div class="pet-stats"><div class="pet-stat"><span>⚖️ Peso</span><strong id="pet-weight">4.0 kg</strong></div><div class="pet-stat"><span>🍖 Comida</span><strong id="pet-food">0 porciones</strong></div></div>
+                        <button id="pet-feed" class="action-btn pet-feed-btn" type="button" disabled>Dar de comer 🦴</button>
+                        <p id="pet-status" class="form-status" role="status" aria-live="polite"></p>
+                    </section>
+                    <section class="pet-care">
+                        <h3>Pónganle un nombre</h3>
+                        <form id="pet-name-form" class="pet-name-form"><label class="field-label" for="pet-name-input">¿Cómo se llamará?</label><div class="pet-name-row"><input id="pet-name-input" type="text" maxlength="24" placeholder="Nube" required><button class="memory-action-btn" type="submit">Guardar</button></div></form>
+                        <h3>Elijan su ropita</h3>
+                        <div class="pet-outfits" role="group" aria-label="Ropita del cachorro"><button class="pet-outfit-btn" type="button" data-pet-outfit="none">Natural 🐾</button><button class="pet-outfit-btn" type="button" data-pet-outfit="collar">Collar 🎀</button><button class="pet-outfit-btn" type="button" data-pet-outfit="sweater">Suéter 🧶</button><button class="pet-outfit-btn" type="button" data-pet-outfit="bow">Moñito 🌸</button></div>
+                        <div class="pet-question-card">
+                            <span class="section-kicker">Pregunta de hoy · una nueva cada día</span>
+                            <p id="pet-question" class="pet-question">Preparando su pregunta bonita…</p>
+                            <p id="pet-answer-saved" class="pet-answer-saved" hidden></p>
+                            <form id="pet-answer-form" class="entry-form"><label class="field-label" for="pet-answer">Su respuesta</label><textarea id="pet-answer" rows="3" maxlength="500" placeholder="Cuéntense algo bonito…" required></textarea><button class="action-btn" type="submit">Responder y ganar comida ✨</button><p id="pet-question-status" class="form-status" role="status" aria-live="polite"></p></form>
+                        </div>
+                    </section>
+                </div>
+                <p class="helper-text privacy-note">El cachorro es compartido: su nombre, ropita, comida, peso y respuestas se guardan para ambos. Como la página es pública, cualquier visitante puede ver esos datos.</p>
+            </div>
+        </div>
+    </div>
     <!-- Vinculación con el archivo JS -->
     <script src="config.js"></script>
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>
