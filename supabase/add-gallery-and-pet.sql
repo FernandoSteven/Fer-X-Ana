@@ -42,9 +42,10 @@ create policy "Anyone can delete shared gallery items"
 create table if not exists public.shared_pet (
     id smallint primary key default 1 check (id = 1),
     name text not null default 'Nube',
-    weight_kg numeric(4, 2) not null default 4.00,
+    weight_kg numeric not null default 4.00,
     food_count integer not null default 0,
     last_fed_on date,
+    last_exercised_on date,
     last_answered_on date,
     last_answer text not null default '',
     outfit text not null default 'none',
@@ -52,7 +53,6 @@ create table if not exists public.shared_pet (
     constraint shared_pet_name_check check (
         char_length(btrim(name)) between 1 and 24
     ),
-    constraint shared_pet_weight_check check (weight_kg between 2.20 and 8.00),
     constraint shared_pet_food_check check (food_count >= 0),
     constraint shared_pet_answer_check check (char_length(last_answer) <= 500),
     constraint shared_pet_outfit_check check (outfit in ('none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven', 'scholar'))
