@@ -1675,7 +1675,12 @@ function daysBetweenPetDates(start, end) {
 function currentPetWeight(pet, today) {
     const weightValue = Number(pet && pet.weight_kg);
     const savedWeight = Number.isFinite(weightValue) ? weightValue : 4;
-    const missedDays = daysBetweenPetDates(pet && pet.last_fed_on, today);
+    const lastFedOn = pet && pet.last_fed_on;
+    const weightUpdatedOn = pet && pet.weight_updated_on || lastFedOn;
+    const missedDays = Math.max(
+        0,
+        daysBetweenPetDates(lastFedOn, today) - daysBetweenPetDates(lastFedOn, weightUpdatedOn)
+    );
     return Math.max(0, savedWeight - missedDays * 0.12);
 }
 
@@ -1809,7 +1814,7 @@ function renderPet() {
 
 async function loadPetState() {
     const rows = await supabaseRequest(
-        '/rest/v1/shared_pet?select=id,name,weight_kg,food_count,last_fed_on,last_exercised_on,last_answered_on,last_answer,outfit&id=eq.1&limit=1'
+        '/rest/v1/shared_pet?select=id,name,weight_kg,food_count,last_fed_on,last_exercised_on,weight_updated_on,last_answered_on,last_answer,outfit&id=eq.1&limit=1'
     );
     sharedPet = Array.isArray(rows) ? rows[0] || null : null;
     renderPet();
@@ -2056,6 +2061,7 @@ if (petFeedButton) {
             await savePetChanges({
                 food_count: foodCount - 1,
                 last_fed_on: today,
+                weight_updated_on: today,
                 weight_kg: Number(weight.toFixed(2))
             }, '¡Qué bien cuidado! Su pancita está contenta 🐶🤍');
             saved = true;
@@ -2085,7 +2091,8 @@ if (petExerciseButton) {
         const weight = Math.max(0, currentPetWeight(sharedPet, today) - 0.1);
         const changes = {
             weight_kg: Number(weight.toFixed(2)),
-            last_exercised_on: today
+            last_exercised_on: today,
+            weight_updated_on: today
         };
         let saved = false;
         try {
