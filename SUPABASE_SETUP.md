@@ -52,4 +52,6 @@ El límite de los videos es 50 MB por archivo. Las fotos se optimizan antes de s
 
 ## Activar el historial de respuestas del cachorro
 
-Después de ejecutar supabase/add-gallery-and-pet.sql, ejecuta supabase/add-pet-answer-history.sql en Supabase SQL Editor. Para activar las cinco preguntas diarias y las dos respuestas de cada una, ejecuta luego supabase/expand-pet-daily-questions.sql. La página conserva las respuestas anteriores y las muestra en el historial; cada pregunta entrega una porción de comida cuando se guardan sus dos respuestas. Cada respuesta pide el nombre de quien respondió, pero el sitio no puede verificar la identidad sin cuentas.
+Después de ejecutar supabase/add-gallery-and-pet.sql, ejecuta supabase/add-pet-answer-history.sql en Supabase SQL Editor. Para activar las cinco preguntas diarias y las dos respuestas de cada una, ejecuta luego supabase/expand-pet-daily-questions.sql. La página conserva las respuestas anteriores y las muestra en el historial; cada pregunta completada por ambos entrega una porción de comida, hasta cinco por día. Cada respuesta pide el nombre de quien respondió, pero el sitio no puede verificar la identidad sin cuentas.
+
+Para activar el traje de estudioso en una base de datos existente, ejecuta supabase/add-pet-scholar-outfit.sql en Supabase SQL Editor.

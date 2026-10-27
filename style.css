@@ -977,7 +977,8 @@ video.gallery-media {
 .pet-figure[data-outfit="bee"] .clothing-bee,
 .pet-figure[data-outfit="raincoat"] .clothing-raincoat,
 .pet-figure[data-outfit="crown"] .clothing-crown,
-.pet-figure[data-outfit="six-seven"] .clothing-six-seven {
+.pet-figure[data-outfit="six-seven"] .clothing-six-seven,
+.pet-figure[data-outfit="scholar"] .clothing-scholar {
     display: inline;
 }
 .pet-heart {

@@ -1578,7 +1578,7 @@ function renderDailyPetQuestions({ preserveDrafts = true, skipQuestionIndex = nu
         } else {
             const complete = document.createElement('p');
             complete.className = 'pet-daily-complete';
-            complete.textContent = '¡Esta pregunta ya tiene sus dos respuestas! Ganaron una porción para el cachorro 🦴';
+            complete.textContent = '¡Pregunta completada! Ganaron una porción para el cachorro. Pueden completar hasta cinco al día 🦴';
             card.append(complete);
         }
         fragment.append(card);
@@ -1616,7 +1616,7 @@ function renderPet() {
     if (!sharedPet) return;
     const today = petDayKey();
     const name = String(sharedPet.name || 'Nube');
-    const outfits = ['none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven'];
+    const outfits = ['none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven', 'scholar'];
     const outfit = outfits.includes(sharedPet.outfit) ? sharedPet.outfit : 'none';
     const figure = document.getElementById('pet-figure');
     const nameDisplay = document.getElementById('pet-name-display');
@@ -1863,8 +1863,8 @@ async function handlePetAnswerSubmit(form, event) {
         sharedPet.last_answer = answer;
         renderPet();
         setStatus(petQuestionStatus, responseIndex === petResponsesPerQuestion
-            ? '¡Ya respondieron los dos! Ganaron una porción para su cachorrito 🦴'
-            : '¡Respuesta guardada! Falta la segunda respuesta para ganar su porción 🤍');
+            ? '¡Pregunta completada! Ganaron una porción para su cachorrito. Cada una de las cinco preguntas da una 🦴'
+            : '¡Respuesta guardada! Falta la segunda respuesta; al completar esta pregunta ganarán una porción 🤍');
     } catch (error) {
         if (error.status === 409) {
             await Promise.all([loadPetState().catch(() => {}), loadPetAnswerHistory()]);
