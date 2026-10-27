@@ -46,6 +46,7 @@ create table if not exists public.shared_pet (
     food_count integer not null default 0,
     last_fed_on date,
     last_exercised_on date,
+    weight_updated_on date not null default current_date,
     last_answered_on date,
     last_answer text not null default '',
     outfit text not null default 'none',
