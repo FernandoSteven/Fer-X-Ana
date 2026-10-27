@@ -1029,9 +1029,71 @@ video.gallery-media {
     color: #a84267;
     font-size: 1rem;
 }
-.pet-feed-btn {
-    justify-self: center;
+.pet-speech-bubble {
+    position: relative;
+    width: min(100%, 280px);
+    margin: 15px auto 14px;
+    border: 1px solid #f0d7e3;
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 7px 17px rgba(105, 63, 91, .1);
+    color: #92516e;
+    padding: 11px 14px;
+    font-size: .82rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+.pet-speech-bubble::after {
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    width: 13px;
+    height: 13px;
+    border-right: 1px solid #f0d7e3;
+    border-bottom: 1px solid #f0d7e3;
+    background: #fff;
+    content: '';
+    transform: translateX(-50%) rotate(45deg);
+}
+.pet-action-effect {
+    position: absolute;
+    top: 39%;
+    right: 10%;
+    z-index: 1;
+    font-size: 1.9rem;
+    filter: drop-shadow(0 3px 5px rgba(107, 74, 90, .22));
+    pointer-events: none;
+}
+.pet-figure.is-eating svg {
+    transform-origin: 50% 70%;
+    animation: pet-chew .38s ease-in-out infinite;
+}
+.pet-figure.is-exercising svg {
+    transform-origin: 50% 90%;
+    animation: pet-jog .42s ease-in-out infinite;
+}
+.pet-figure.is-eating .pet-action-effect {
+    animation: pet-food-pop .72s ease-in-out infinite;
+}
+.pet-figure.is-exercising .pet-action-effect {
+    animation: pet-paw-hop .45s ease-in-out infinite;
+}
+.pet-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 9px;
     margin-top: 15px;
+}
+.pet-actions .action-btn {
+    margin-top: 0;
+}
+.pet-exercise-btn {
+    background: linear-gradient(135deg, #76aa91, #8bc1a6);
+    box-shadow: 0 7px 17px rgba(91, 150, 119, .22);
+}
+.pet-exercise-btn:hover {
+    box-shadow: 0 10px 22px rgba(91, 150, 119, .3);
 }
 .pet-care > h3 {
     margin: 3px 0 7px;
@@ -1256,6 +1318,23 @@ video.gallery-media {
     40%, 63% { opacity: .75; transform: translateY(-4px) scale(1); }
     90%, 100% { opacity: 0; transform: translateY(-14px) scale(.8); }
 }
+@keyframes pet-chew {
+    0%, 100% { transform: scaleY(1) rotate(0); }
+    50% { transform: scaleY(.96) rotate(-1.5deg); }
+}
+@keyframes pet-jog {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-5px) rotate(-2deg); }
+    75% { transform: translateX(5px) rotate(2deg); }
+}
+@keyframes pet-food-pop {
+    0%, 100% { opacity: .65; transform: translateY(1px) scale(.9) rotate(-8deg); }
+    50% { opacity: 1; transform: translateY(-8px) scale(1.12) rotate(8deg); }
+}
+@keyframes pet-paw-hop {
+    0%, 100% { opacity: .6; transform: translateY(2px) rotate(-12deg); }
+    50% { opacity: 1; transform: translateY(-8px) rotate(12deg); }
+}
 @media (max-width: 700px) {
     .pet-layout {
         grid-template-columns: minmax(0, 1fr);
@@ -1266,7 +1345,10 @@ video.gallery-media {
 }
 @media (prefers-reduced-motion: reduce) {
     .pet-figure,
-    .pet-heart {
+    .pet-heart,
+    .pet-figure.is-eating svg,
+    .pet-figure.is-exercising svg,
+    .pet-action-effect {
         animation: none;
     }
 }

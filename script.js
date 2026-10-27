@@ -1312,6 +1312,9 @@ const petQuestionStatus = document.getElementById('pet-question-status');
 const petDailyQuestionsContainer = document.getElementById('pet-daily-questions');
 const petNameForm = document.getElementById('pet-name-form');
 const petFeedButton = document.getElementById('pet-feed');
+const petExerciseButton = document.getElementById('pet-exercise');
+const petSpeechBubble = document.getElementById('pet-speech-bubble');
+const petActionEffect = document.getElementById('pet-action-effect');
 const petAnswerHistoryList = document.getElementById('pet-answer-history');
 const petAnswerHistoryStatus = document.getElementById('pet-answer-history-status');
 const petAnswerHistoryCount = document.getElementById('pet-answer-history-count');
@@ -1324,9 +1327,72 @@ let petAnswerSubmitting = false;
 let petControlsEnabled = false;
 let renderedPetQuestionDate = '';
 let renderedPetQuestionSignature = '';
+let petSpeechTimer = null;
+let petActionTimer = null;
+let petActionBusy = false;
+let currentPetAction = '';
+let lastPetSpeechKey = '';
 const petHistoryPageSize = 20;
 const petDailyQuestionLimit = 5;
 const petResponsesPerQuestion = 2;
+
+const petGreetings = [
+    '¡Hola, mis humanos favoritos!', '¡Guau, mis dos personas especiales!', '¡Buenos días, familia bonita!',
+    '¡Hola, mis amores!', '¡Aquí está su cachorrito feliz!', '¡Hola, mis compañeros de aventuras!',
+    '¡Buenas, mis corazones favoritos!', '¡Guau, mis personitas lindas!', '¡Hola, los mejores humanos del mundo!',
+    '¡Guau, mi familia de dos!', '¡Ey, mis personas queridas!', '¡Llegó su bebé de cuatro patitas!',
+    '¡Hola, mis abrazos favoritos!', '¡Guau, mis cuidadores más tiernos!', '¡Buenos días, mis dos soles!',
+    '¡Hola, mi equipo favorito!', '¡Aquí estoy, familia preciosa!', '¡Guau, mis consentidores favoritos!',
+    '¡Hola, mis cuidadores de corazón!', '¡Buenas, mis dos estrellas!', '¡Ya despertó su bolita de pelo!',
+    '¡Hola, mis humanos adorados!', '¡Guau, mis compañeros favoritos!', '¡Aquí está su cachorro enamorado!'
+];
+
+const petLoveMessages = [
+    'Los quiero con todo mi corazón perruno.', 'Me hacen sentir el cachorro más querido del mundo.',
+    'Ustedes son mi lugar seguro, aunque a veces estemos lejos.', 'Mi colita se mueve cada vez que pienso en ustedes.',
+    'Con ustedes, hasta una siestita parece una aventura.', 'Me encanta ser su pequeño compañero de vida.',
+    'Les guardo un montón de besitos con mi hocico.', 'Su cariño es mejor que todos mis premios.',
+    'Yo los elegiría como mi familia en cualquier vida.', 'Soy pequeñito, pero mi amor por ustedes es enorme.',
+    'Su voz es mi canción favorita.', 'Los extraño cuando no están y los quiero siempre.',
+    'Mi corazón hace guau-guau por ustedes.', 'Gracias por cuidarme con tanto amor.',
+    'Ustedes vuelven bonito hasta un día cualquiera.', 'Me siento afortunado de tenerlos a los dos.',
+    'Su amor me llena la pancita y el corazón.', 'Quiero acompañarlos en todos sus días.',
+    'Mis patitas siempre quieren ir hacia ustedes.', 'Guardo un abrazo peludito para cuando se vean.',
+    'Los adoro más que a mis juguetes favoritos.', 'Con ustedes siempre siento que estoy en casa.'
+];
+
+const petLoveClosings = [
+    '¿Me regalan una caricia virtual?', '¡Les mando lamiditas y un guau!', '¿Jugamos juntos cuando puedan?',
+    '¡No olviden que soy su bebé peludo!', 'Les mando un abrazo con mi colita.', '¿Me cuentan algo bonito hoy?',
+    'Voy a soñar con los dos esta noche.', '¡Guau de amor para mi familia!',
+    '¿Me dan una rascadita detrás de la oreja?', 'Mi colita va a seguir moviéndose por ustedes.',
+    '¡Perrito feliz, humanos felices!', 'Gracias por ser mi hogar.',
+    'Les dejo un besito en cada mejilla.', '¿Compartimos una siestita imaginaria?',
+    '¡Los quiero de aquí hasta la luna!'
+];
+
+// 24 saludos x 22 frases cariñosas x 15 cierres = 7,920 mensajes distintos.
+const petOverweightMessages = [
+    '¡Ay, estoy muy gordito! ¿Hacemos ejercicio juntitos? 🐾',
+    'Mi pancita ya está muy grande; creo que hoy toca mover las patitas 🤍',
+    '¡Me estoy poniendo bien gordito! Una caminata suave me vendría bien.',
+    'Ya pasé los 20 kg y estoy muy gordito. ¿Salimos a pasear?',
+    'Mi pancita está enorme; quiero correr un ratito con ustedes.',
+    'Estoy muy rellenito; ¡hora de hacer ejercicio y jugar!',
+    '¡Guau! Estoy muy gordito. ¿Me acompañan con unos pasitos?',
+    'Mi cuerpito está pesadito; una sesión de ejercicio me ayudará 🐾'
+];
+
+const petUnderweightMessages = [
+    '¡Estoy muy flaco! ¿Me ayudan con una porción de comida y mucho cariño? 🤍',
+    'Peso menos de 3 kg y estoy muy flaquito; quiero comer rico.',
+    'Me veo muy flaquito; ¿me dan comidita y me mandan muchos mimos?',
+    '¡Guau, estoy muy delgado! Necesito comidita y palabras bonitas.',
+    'Mi pancita está vacía y estoy muy flaco; una comida me vendría genial.',
+    'Me estoy quedando muy flaquita; ¿jugamos después de comer?',
+    '¡Estoy muy flaquito! Cuídenme con comida rica y mucho amor.',
+    'Peso poquito y estoy muy delgadito; gracias por ayudarme a cuidarme.'
+];
 
 const petQuestionTopics = [
     'nuestro primer saludo', 'nuestras primeras conversaciones', 'la primera vez que nos reímos juntos',
@@ -1607,9 +1673,89 @@ function daysBetweenPetDates(start, end) {
 }
 
 function currentPetWeight(pet, today) {
-    const savedWeight = Number(pet && pet.weight_kg) || 4;
+    const weightValue = Number(pet && pet.weight_kg);
+    const savedWeight = Number.isFinite(weightValue) ? weightValue : 4;
     const missedDays = daysBetweenPetDates(pet && pet.last_fed_on, today);
-    return Math.max(2.2, savedWeight - missedDays * 0.12);
+    return Math.max(0, savedWeight - missedDays * 0.12);
+}
+
+function petMessageSeed(slot, band) {
+    const value = String(slot) + ':' + band;
+    let hash = 2166136261;
+    for (let index = 0; index < value.length; index += 1) {
+        hash = Math.imul(hash ^ value.charCodeAt(index), 16777619);
+    }
+    return hash >>> 0;
+}
+
+function seededPetRandom(seed) {
+    let value = seed >>> 0;
+    return () => {
+        value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+        return value / 4294967296;
+    };
+}
+
+function updatePetSpeech(weight) {
+    if (!petSpeechBubble || currentPetAction) return;
+    const band = weight > 20 ? 'overweight' : weight < 3 ? 'underweight' : 'affection';
+    const interval = 4 * 60 * 60 * 1000;
+    const slot = Math.floor(Date.now() / interval);
+    const messageKey = String(slot) + ':' + band;
+    if (messageKey === lastPetSpeechKey && petSpeechBubble.textContent.trim()) return;
+
+    const random = seededPetRandom(petMessageSeed(slot, band));
+    const pick = lines => lines[Math.floor(random() * lines.length)];
+    let message;
+    if (band === 'overweight') {
+        message = pick(petOverweightMessages);
+    } else if (band === 'underweight') {
+        message = pick(petUnderweightMessages);
+    } else {
+        message = pick(petGreetings) + ' ' + pick(petLoveMessages) + ' ' + pick(petLoveClosings);
+    }
+    lastPetSpeechKey = messageKey;
+    petSpeechBubble.textContent = message;
+}
+
+function schedulePetSpeechRefresh() {
+    if (petSpeechTimer) clearTimeout(petSpeechTimer);
+    const interval = 4 * 60 * 60 * 1000;
+    const untilNextSlot = interval - (Date.now() % interval) + 50;
+    petSpeechTimer = setTimeout(() => {
+        petSpeechTimer = null;
+        if (sharedPet) updatePetSpeech(currentPetWeight(sharedPet, petDayKey()));
+        schedulePetSpeechRefresh();
+    }, untilNextSlot);
+}
+
+function startPetActionAnimation(action) {
+    const figure = document.getElementById('pet-figure');
+    if (!figure) return;
+    if (petActionTimer) clearTimeout(petActionTimer);
+    currentPetAction = action;
+    petActionBusy = true;
+    figure.classList.remove('is-eating', 'is-exercising');
+    figure.classList.add('is-' + action);
+    if (petActionEffect) {
+        petActionEffect.textContent = action === 'eating' ? '🦴' : '🐾';
+        petActionEffect.hidden = false;
+    }
+    if (petSpeechBubble) {
+        petSpeechBubble.textContent = action === 'eating'
+            ? '¡Ñam, ñam! Gracias por cuidarme 🤍'
+            : '¡A mover las patitas! ¡Vamos juntitos! 🐾';
+    }
+    if (petFeedButton) petFeedButton.disabled = true;
+    if (petExerciseButton) petExerciseButton.disabled = true;
+    petActionTimer = setTimeout(() => {
+        figure.classList.remove('is-eating', 'is-exercising');
+        if (petActionEffect) petActionEffect.hidden = true;
+        currentPetAction = '';
+        petActionBusy = false;
+        lastPetSpeechKey = '';
+        renderPet();
+    }, 5000);
 }
 
 function renderPet() {
@@ -1625,6 +1771,7 @@ function renderPet() {
     const foodDisplay = document.getElementById('pet-food');
     const mood = document.getElementById('pet-mood');
     const alreadyFed = sharedPet.last_fed_on === today;
+    const alreadyExercised = sharedPet.last_exercised_on === today;
     const foodCount = Math.max(0, Number(sharedPet.food_count) || 0);
     const weight = currentPetWeight(sharedPet, today);
 
@@ -1633,10 +1780,16 @@ function renderPet() {
     if (nameInput && document.activeElement !== nameInput) nameInput.value = name;
     if (weightDisplay) weightDisplay.textContent = weight.toFixed(1) + ' kg';
     if (foodDisplay) foodDisplay.textContent = foodCount + (foodCount === 1 ? ' porción' : ' porciones');
+    updatePetSpeech(weight);
+    if (!petSpeechTimer) schedulePetSpeechRefresh();
     renderDailyPetQuestionsIfChanged();
     if (petFeedButton) {
-        petFeedButton.disabled = foodCount < 1 || alreadyFed;
+        petFeedButton.disabled = !petControlsEnabled || petActionBusy || foodCount < 1 || alreadyFed;
         petFeedButton.textContent = alreadyFed ? 'Ya comió hoy 🤍' : 'Dar de comer 🦴';
+    }
+    if (petExerciseButton) {
+        petExerciseButton.disabled = !petControlsEnabled || petActionBusy || alreadyExercised;
+        petExerciseButton.textContent = alreadyExercised ? 'Ejercicio listo hoy 🤍' : 'Ejercicio 🐾';
     }
     if (mood) {
         if (daysBetweenPetDates(sharedPet.last_fed_on, today) >= 2) {
@@ -1656,7 +1809,7 @@ function renderPet() {
 
 async function loadPetState() {
     const rows = await supabaseRequest(
-        '/rest/v1/shared_pet?select=id,name,weight_kg,food_count,last_fed_on,last_answered_on,last_answer,outfit&id=eq.1&limit=1'
+        '/rest/v1/shared_pet?select=id,name,weight_kg,food_count,last_fed_on,last_exercised_on,last_answered_on,last_answer,outfit&id=eq.1&limit=1'
     );
     sharedPet = Array.isArray(rows) ? rows[0] || null : null;
     renderPet();
@@ -1887,26 +2040,80 @@ if (petDailyQuestionsContainer) {
 
 if (petFeedButton) {
     petFeedButton.addEventListener('click', async () => {
-        if (!sharedPet || !supabaseReady) return;
+        if (!sharedPet || !supabaseReady || petActionBusy) return;
         const today = petDayKey();
         const foodCount = Math.max(0, Number(sharedPet.food_count) || 0);
         if (foodCount < 1 || sharedPet.last_fed_on === today) {
             renderPet();
             return;
         }
-        petFeedButton.disabled = true;
+        petActionBusy = true;
+        renderPet();
         setStatus(petStatus, 'Dándole su comida...');
-        const weight = Math.min(8, currentPetWeight(sharedPet, today) + 0.2);
+        const weight = currentPetWeight(sharedPet, today) + 0.2;
+        let saved = false;
         try {
             await savePetChanges({
                 food_count: foodCount - 1,
                 last_fed_on: today,
                 weight_kg: Number(weight.toFixed(2))
             }, '¡Qué bien cuidado! Su pancita está contenta 🐶🤍');
+            saved = true;
+            startPetActionAnimation('eating');
         } catch (error) {
             setStatus(petStatus, error.message || 'No se pudo guardar la comida.');
         } finally {
+            if (!saved) {
+                petActionBusy = false;
+                renderPet();
+            }
+        }
+    });
+}
+
+if (petExerciseButton) {
+    petExerciseButton.addEventListener('click', async () => {
+        if (!sharedPet || !supabaseReady || petActionBusy) return;
+        const today = petDayKey();
+        if (sharedPet.last_exercised_on === today) {
             renderPet();
+            return;
+        }
+        petActionBusy = true;
+        renderPet();
+        setStatus(petStatus, '¡A correr y mover las patitas! 🐾');
+        const weight = Math.max(0, currentPetWeight(sharedPet, today) - 0.1);
+        const changes = {
+            weight_kg: Number(weight.toFixed(2)),
+            last_exercised_on: today
+        };
+        let saved = false;
+        try {
+            const rows = await supabaseRequest(
+                '/rest/v1/shared_pet?id=eq.1&or=(last_exercised_on.is.null,last_exercised_on.neq.' + today + ')',
+                {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                    body: JSON.stringify(changes)
+                }
+            );
+            if (!Array.isArray(rows) || rows.length === 0) {
+                await loadPetState();
+                setStatus(petStatus, '¡Ya hizo ejercicio por hoy! Mañana vuelven a pasear 🤍');
+                return;
+            }
+            sharedPet = Object.assign({}, sharedPet, changes);
+            renderPet();
+            setStatus(petStatus, '¡Qué bien! Bajó un poquito de peso con su paseo 🐶🤍');
+            saved = true;
+            startPetActionAnimation('exercising');
+        } catch (error) {
+            setStatus(petStatus, error.message || 'No se pudo guardar el ejercicio.');
+        } finally {
+            if (!saved) {
+                petActionBusy = false;
+                renderPet();
+            }
         }
     });
 }
@@ -1936,6 +2143,7 @@ function setPetControlsEnabled(enabled) {
         });
     }
     if (!enabled && petFeedButton) petFeedButton.disabled = true;
+    if (!enabled && petExerciseButton) petExerciseButton.disabled = true;
     if (enabled) renderPet();
 }
 async function initializePet() {
