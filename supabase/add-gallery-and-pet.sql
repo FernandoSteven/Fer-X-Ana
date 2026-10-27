@@ -55,7 +55,7 @@ create table if not exists public.shared_pet (
     constraint shared_pet_weight_check check (weight_kg between 2.20 and 8.00),
     constraint shared_pet_food_check check (food_count >= 0),
     constraint shared_pet_answer_check check (char_length(last_answer) <= 500),
-    constraint shared_pet_outfit_check check (outfit in ('none', 'collar', 'sweater', 'bow'))
+    constraint shared_pet_outfit_check check (outfit in ('none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven', 'scholar'))
 );
 
 insert into public.shared_pet (id) values (1)

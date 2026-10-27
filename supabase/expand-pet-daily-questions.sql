@@ -26,13 +26,13 @@ alter table public.pet_answer_history
 create index if not exists pet_answer_history_daily_order_idx
     on public.pet_answer_history (answered_on desc, question_index asc, response_index asc);
 
--- Keep shared_pet.outfit in sync with the eight selectable outfits on the page.
+-- Keep shared_pet.outfit in sync with all selectable outfits on the page.
 alter table public.shared_pet
     drop constraint if exists shared_pet_outfit_check;
 
 alter table public.shared_pet
     add constraint shared_pet_outfit_check
-        check (outfit in ('none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven'));
+        check (outfit in ('none', 'collar', 'sweater', 'bow', 'pajamas', 'bee', 'raincoat', 'crown', 'six-seven', 'scholar'));
 
 create or replace function public.validate_pet_answer_history_slot()
 returns trigger
